@@ -66,7 +66,11 @@ class zEventList(Converter, object):
 
         i = 1
         while i <= (self.eventcount) and event:
-            event = self.epgcache.lookupEventTime(eServiceReference(ref.toString()), event.getBeginTime() + event.getDuration())
+            event = self.epgcache.lookupEventTime(
+                eServiceReference(
+                    ref.toString()),
+                event.getBeginTime() +
+                event.getDuration())
             if event:
                 contentList.append(self.getEventTuple(event),)
             i += 1
@@ -76,7 +80,8 @@ class zEventList(Converter, object):
             if time() > mktime(dt.timetuple()):
                 dt += timedelta(days=1)  # skip to next day...
             primeTime = int(mktime(dt.timetuple()))
-            event = self.epgcache.lookupEventTime(eServiceReference(ref.toString()), primeTime)
+            event = self.epgcache.lookupEventTime(
+                eServiceReference(ref.toString()), primeTime)
             if event and (event.getBeginTime() <= int(mktime(dt.timetuple()))):
                 contentList.append(self.getEventTuple(event),)
 
@@ -85,9 +90,13 @@ class zEventList(Converter, object):
     def getEventTuple(self, event):
         try:
             if self.beginOnly:
-                time = "%s" % (strftime("%H:%M", localtime(event.getBeginTime())), )
+                time = "%s" % (
+                    strftime("%H:%M", localtime(event.getBeginTime())), )
             else:
-                time = "%s - %s" % (strftime("%H:%M", localtime(event.getBeginTime())), strftime("%H:%M", localtime(event.getBeginTime() + event.getDuration())))
+                time = "%s - %s" % (strftime("%H:%M",
+                                             localtime(event.getBeginTime())),
+                                    strftime("%H:%M",
+                                             localtime(event.getBeginTime() + event.getDuration())))
             title = event.getEventName()
             duration = "%d min" % (event.getDuration() / 60)
             return (time, title, duration)

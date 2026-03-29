@@ -26,9 +26,14 @@ HD = getDesktop(0).size()
 
 def initWeatherPluginEntryConfig():
     s = ConfigSubsection()
-    s.city = ConfigText(default='Heidelberg', visible_width=100, fixed_size=False)
-    s.degreetype = ConfigSelection(choices=[('C', _('metric system')), ('F', _('imperial system'))], default='C')
-    s.weatherlocationcode = ConfigText(default='', visible_width=100, fixed_size=False)
+    s.city = ConfigText(
+        default='Heidelberg',
+        visible_width=100,
+        fixed_size=False)
+    s.degreetype = ConfigSelection(
+        choices=[('C', _('metric system')), ('F', _('imperial system'))], default='C')
+    s.weatherlocationcode = ConfigText(
+        default='', visible_width=100, fixed_size=False)
     config.plugins.WeatherPlugin.Entry.append(s)
     return s
 
@@ -55,12 +60,16 @@ class MSNWeatherPluginEntriesListConfigScreen(Screen):
         self['key_yellow'] = StaticText(_('Edit'))
         self['key_blue'] = StaticText(_('Delete'))
         self['entrylist'] = WeatherPluginEntryList([])
-        self['actions'] = ActionMap(['WizardActions', 'MenuActions', 'ShortcutActions'], {'ok': self.keyOK,
-                                                                                          'back': self.keyClose,
-                                                                                          'red': self.keyClose,
-                                                                                          'green': self.keyGreen,
-                                                                                          'yellow': self.keyYellow,
-                                                                                          'blue': self.keyDelete}, -1)
+        self['actions'] = ActionMap(['WizardActions',
+                                     'MenuActions',
+                                     'ShortcutActions'],
+                                    {'ok': self.keyOK,
+                                     'back': self.keyClose,
+                                     'red': self.keyClose,
+                                     'green': self.keyGreen,
+                                     'yellow': self.keyYellow,
+                                     'blue': self.keyDelete},
+                                    -1)
         self.updateList()
 
     def updateList(self):
@@ -71,13 +80,14 @@ class MSNWeatherPluginEntriesListConfigScreen(Screen):
         return
 
     def keyGreen(self):
-        self.session.openWithCallback(self.updateList, MSNWeatherPluginEntryConfigScreen, None)
+        self.session.openWithCallback(
+            self.updateList, MSNWeatherPluginEntryConfigScreen, None)
         return
 
     def keyOK(self):
         try:
             sel = self['entrylist'].l.getCurrentSelection()[0]
-        except:
+        except BaseException:
             sel = None
 
         self.close(self['entrylist'].getCurrentIndex(), sel)
@@ -86,25 +96,29 @@ class MSNWeatherPluginEntriesListConfigScreen(Screen):
     def keyYellow(self):
         try:
             sel = self['entrylist'].l.getCurrentSelection()[0]
-        except:
+        except BaseException:
             sel = None
 
         if sel is None:
             return
         else:
-            self.session.openWithCallback(self.updateList, MSNWeatherPluginEntryConfigScreen, sel)
+            self.session.openWithCallback(
+                self.updateList, MSNWeatherPluginEntryConfigScreen, sel)
             return
 
     def keyDelete(self):
         try:
             sel = self['entrylist'].l.getCurrentSelection()[0]
-        except:
+        except BaseException:
             sel = None
 
         if sel is None:
             return
         else:
-            self.session.openWithCallback(self.deleteConfirm, MessageBox, _('Really delete this WeatherPlugin Entry?'))
+            self.session.openWithCallback(
+                self.deleteConfirm,
+                MessageBox,
+                _('Really delete this WeatherPlugin Entry?'))
             return
 
     def deleteConfirm(self, result):
@@ -123,11 +137,17 @@ class MSNWeatherPluginEntriesListConfigScreen(Screen):
 class WeatherPluginEntryList(MenuList):
 
     def __init__(self, list, enableWrapAround=True):
-        MenuList.__init__(self, list, enableWrapAround, eListboxPythonMultiContent)
+        MenuList.__init__(
+            self,
+            list,
+            enableWrapAround,
+            eListboxPythonMultiContent)
         fs1 = 20 if HD.width() < 1920 else 30
         fs2 = 18 if HD.width() < 1920 else 28
-        font1, size1 = skinparameter.get('WeatherPluginEntryListFont1', ('Regular', fs1))
-        font2, size2 = skinparameter.get('WeatherPluginEntryListFont2', ('Regular', fs2))
+        font1, size1 = skinparameter.get(
+            'WeatherPluginEntryListFont1', ('Regular', fs1))
+        font2, size2 = skinparameter.get(
+            'WeatherPluginEntryListFont2', ('Regular', fs2))
         self.l.setFont(0, gFont(font1, size1))
         self.l.setFont(1, gFont(font2, size2))
 
@@ -142,26 +162,30 @@ class WeatherPluginEntryList(MenuList):
         list = []
         for c in config.plugins.WeatherPlugin.Entry:
             if HD.width() < 1920:
-                x1, y1, w1, h1 = skinparameter.get('WeatherPluginCity', (5, 0, 400, 20))
-                x2, y2, w2, h2 = skinparameter.get('WeatherPluginDegreetype', (410, 0, 80, 20))
+                x1, y1, w1, h1 = skinparameter.get(
+                    'WeatherPluginCity', (5, 0, 400, 20))
+                x2, y2, w2, h2 = skinparameter.get(
+                    'WeatherPluginDegreetype', (410, 0, 80, 20))
             else:
-                x1, y1, w1, h1 = skinparameter.get('WeatherPluginCity', (10, 0, 700, 50))
-                x2, y2, w2, h2 = skinparameter.get('WeatherPluginDegreetype', (770, 0, 100, 50))
+                x1, y1, w1, h1 = skinparameter.get(
+                    'WeatherPluginCity', (10, 0, 700, 50))
+                x2, y2, w2, h2 = skinparameter.get(
+                    'WeatherPluginDegreetype', (770, 0, 100, 50))
             res = [c, (eListboxPythonMultiContent.TYPE_TEXT,
-                                                          x1,
-                                                          y1,
-                                                          w1,
-                                                          h1,
-                                                          1,
-                                                          RT_HALIGN_LEFT | RT_VALIGN_CENTER,
-                                                          str(c.city.value)), (eListboxPythonMultiContent.TYPE_TEXT,
-                                                          x2,
-                                                          y2,
-                                                          w2,
-                                                          h2,
-                                                          1,
-                                                          RT_HALIGN_LEFT | RT_VALIGN_CENTER,
-                                                          str(c.degreetype.value))]
+                       x1,
+                       y1,
+                       w1,
+                       h1,
+                       1,
+                       RT_HALIGN_LEFT | RT_VALIGN_CENTER,
+                       str(c.city.value)), (eListboxPythonMultiContent.TYPE_TEXT,
+                                            x2,
+                                            y2,
+                                            w2,
+                                            h2,
+                                            1,
+                                            RT_HALIGN_LEFT | RT_VALIGN_CENTER,
+                                            str(c.degreetype.value))]
             list.append(res)
 
         self.list = list
@@ -175,12 +199,15 @@ class MSNWeatherPluginEntryConfigScreen(ConfigListScreen, Screen):
     def __init__(self, session, entry):
         Screen.__init__(self, session)
         self.title = _('WeatherPlugin: Edit Entry')
-        self['actions'] = ActionMap(['SetupActions', 'ColorActions'], {'green': self.keySave,
-                                                                       'red': self.keyCancel,
-                                                                       'blue': self.keyDelete,
-                                                                       'yellow': self.searchLocation,
-                                                                       'cancel': self.keyCancel,
-                                                                       'ok': self.keyOK}, -2)
+        self['actions'] = ActionMap(['SetupActions',
+                                     'ColorActions'],
+                                    {'green': self.keySave,
+                                     'red': self.keyCancel,
+                                     'blue': self.keyDelete,
+                                     'yellow': self.searchLocation,
+                                     'cancel': self.keyCancel,
+                                     'ok': self.keyOK},
+                                    -2)
         self['key_red'] = StaticText(_('Cancel'))
         self['key_green'] = StaticText(_('OK'))
         self['key_blue'] = StaticText(_('Delete'))
@@ -191,7 +218,11 @@ class MSNWeatherPluginEntryConfigScreen(ConfigListScreen, Screen):
         else:
             self.newmode = 0
             self.current = entry
-        cfglist = [getConfigListEntry(_('City'), self.current.city), getConfigListEntry(_('Location code'), self.current.weatherlocationcode), getConfigListEntry(_('System'), self.current.degreetype)]
+        cfglist = [
+            getConfigListEntry(
+                _('City'), self.current.city), getConfigListEntry(
+                _('Location code'), self.current.weatherlocationcode), getConfigListEntry(
+                _('System'), self.current.degreetype)]
         ConfigListScreen.__init__(self, cfglist, session)
         return
 
@@ -202,10 +233,17 @@ class MSNWeatherPluginEntryConfigScreen(ConfigListScreen, Screen):
                 language = 'en-US'
             elif language == 'no-NO':
                 language = 'nn-NO'
-            url = 'http://weather.service.msn.com/find.aspx?src=windows&outputview=search&weasearchstr=%s&culture=%s' % (urllib_quote(self.current.city.value), language)
-            getPage(six.ensure_binary(url)).addCallback(self.xmlCallback).addErrback(self.error)
+            url = 'http://weather.service.msn.com/find.aspx?src=windows&outputview=search&weasearchstr=%s&culture=%s' % (
+                urllib_quote(self.current.city.value), language)
+            getPage(
+                six.ensure_binary(url)).addCallback(
+                self.xmlCallback).addErrback(
+                self.error)
         else:
-            self.session.open(MessageBox, _('You need to enter a valid city name before you can search for the location code.'), MessageBox.TYPE_ERROR)
+            self.session.open(
+                MessageBox,
+                _('You need to enter a valid city name before you can search for the location code.'),
+                MessageBox.TYPE_ERROR)
 
     def keySave(self):
         if self.current.city.value != '' and self.current.weatherlocationcode.value != '':
@@ -217,9 +255,15 @@ class MSNWeatherPluginEntryConfigScreen(ConfigListScreen, Screen):
             configfile.save()
             self.close()
         elif self.current.city.value == '':
-            self.session.open(MessageBox, _('Please enter a valid city name.'), MessageBox.TYPE_ERROR)
+            self.session.open(
+                MessageBox,
+                _('Please enter a valid city name.'),
+                MessageBox.TYPE_ERROR)
         else:
-            self.session.open(MessageBox, _('Please enter a valid location code for the city.'), MessageBox.TYPE_ERROR)
+            self.session.open(
+                MessageBox,
+                _('Please enter a valid location code for the city.'),
+                MessageBox.TYPE_ERROR)
 
     def keyCancel(self):
         if self.newmode == 1:
@@ -230,23 +274,34 @@ class MSNWeatherPluginEntryConfigScreen(ConfigListScreen, Screen):
         text = self['config'].getCurrent()[1].value
         if text == self.current.city.value:
             title = _('Please enter a valid city name.')
-            self.session.openWithCallback(self.VirtualKeyBoardCallBack, VirtualKeyBoard, title=title, text=text)
+            self.session.openWithCallback(
+                self.VirtualKeyBoardCallBack,
+                VirtualKeyBoard,
+                title=title,
+                text=text)
         elif text == self.current.weatherlocationcode.value:
             title = _('Please enter a valid location code for the city.')
-            self.session.openWithCallback(self.VirtualKeyBoardCallBack, VirtualKeyBoard, title=title, text=text)
+            self.session.openWithCallback(
+                self.VirtualKeyBoardCallBack,
+                VirtualKeyBoard,
+                title=title,
+                text=text)
 
     def VirtualKeyBoardCallBack(self, callback):
         try:
             if callback:
                 self['config'].getCurrent()[1].value = callback
-        except:
+        except BaseException:
             pass
 
     def keyDelete(self):
         if self.newmode == 1:
             self.keyCancel()
         else:
-            self.session.openWithCallback(self.deleteConfirm, MessageBox, _('Really delete this WeatherPlugin Entry?'))
+            self.session.openWithCallback(
+                self.deleteConfirm,
+                MessageBox,
+                _('Really delete this WeatherPlugin Entry?'))
 
     def deleteConfirm(self, result):
         if not result:
@@ -265,13 +320,18 @@ class MSNWeatherPluginEntryConfigScreen(ConfigListScreen, Screen):
             root = cet_fromstring(xmlstring)
             for childs in root:
                 if childs.tag == 'weather' and 'errormessage' in childs.attrib:
-                    errormessage = six.ensure_str(childs.attrib.get('errormessage'), errors='ignore')
+                    errormessage = six.ensure_str(
+                        childs.attrib.get('errormessage'), errors='ignore')
                     break
 
             if len(errormessage) != 0:
-                self.session.open(MessageBox, errormessage, MessageBox.TYPE_ERROR)
+                self.session.open(
+                    MessageBox,
+                    errormessage,
+                    MessageBox.TYPE_ERROR)
             else:
-                self.session.openWithCallback(self.searchCallback, MSNWeatherPluginSearch, xmlstring)
+                self.session.openWithCallback(
+                    self.searchCallback, MSNWeatherPluginSearch, xmlstring)
 
     def error(self, error=None):
         if error is not None:
@@ -309,7 +369,7 @@ class MSNWeatherPluginSearch(Screen):
     def keyOK(self):
         try:
             sel = self['entrylist'].l.getCurrentSelection()[0]
-        except:
+        except BaseException:
             sel = None
 
         self.close(sel)
@@ -319,11 +379,17 @@ class MSNWeatherPluginSearch(Screen):
 class MSNWeatherPluginSearchResultList(MenuList):
 
     def __init__(self, list, enableWrapAround=True):
-        MenuList.__init__(self, list, enableWrapAround, eListboxPythonMultiContent)
+        MenuList.__init__(
+            self,
+            list,
+            enableWrapAround,
+            eListboxPythonMultiContent)
         fs1 = 20 if HD.width() < 1920 else 30
         fs2 = 18 if HD.width() < 1920 else 28
-        font1, size1 = skinparameter.get('WeatherPluginSearchResultListFont1', ('Regular', fs1))
-        font2, size2 = skinparameter.get('WeatherPluginSearchResultListFont2', ('Regular', fs2))
+        font1, size1 = skinparameter.get(
+            'WeatherPluginSearchResultListFont1', ('Regular', fs1))
+        font2, size2 = skinparameter.get(
+            'WeatherPluginSearchResultListFont2', ('Regular', fs2))
         self.l.setFont(0, gFont(font1, size1))
         self.l.setFont(1, gFont(font2, size2))
 
@@ -342,30 +408,41 @@ class MSNWeatherPluginSearchResultList(MenuList):
         list = []
         for childs in root:
             if childs.tag == 'weather':
-                searchlocation = six.ensure_str(childs.attrib.get('weatherlocationname'), errors='ignore')
-                searchresult = six.ensure_str(childs.attrib.get('weatherfullname'), errors='ignore')
-                weatherlocationcode = six.ensure_str(childs.attrib.get('weatherlocationcode'), errors='ignore')
+                searchlocation = six.ensure_str(
+                    childs.attrib.get('weatherlocationname'), errors='ignore')
+                searchresult = six.ensure_str(
+                    childs.attrib.get('weatherfullname'), errors='ignore')
+                weatherlocationcode = six.ensure_str(
+                    childs.attrib.get('weatherlocationcode'), errors='ignore')
                 if HD.width() < 1920:
-                    x1, y1, w1, h1 = skinparameter.get('WeatherPluginSearchlocation', (5, 0, 500, 20))
-                    x2, y2, w2, h2 = skinparameter.get('WeatherPluginSearchresult', (5, 22, 500, 20))
+                    x1, y1, w1, h1 = skinparameter.get(
+                        'WeatherPluginSearchlocation', (5, 0, 500, 20))
+                    x2, y2, w2, h2 = skinparameter.get(
+                        'WeatherPluginSearchresult', (5, 22, 500, 20))
                 else:
-                    x1, y1, w1, h1 = skinparameter.get('WeatherPluginSearchlocation', (10, 0, 650, 50))
-                    x2, y2, w2, h2 = skinparameter.get('WeatherPluginSearchresult', (630, 0, 600, 50))
-                res = [(weatherlocationcode, searchlocation), (eListboxPythonMultiContent.TYPE_TEXT,
-                                                                x1,
-                                                                y1,
-                                                                w1,
-                                                                h1,
-                                                                1,
-                                                                RT_HALIGN_LEFT | RT_VALIGN_CENTER,
-                                                                searchlocation), (eListboxPythonMultiContent.TYPE_TEXT,
-                                                                x2,
-                                                                y2,
-                                                                w2,
-                                                                h2,
-                                                                1,
-                                                                RT_HALIGN_LEFT | RT_VALIGN_CENTER,
-                                                                searchresult)]
+                    x1, y1, w1, h1 = skinparameter.get(
+                        'WeatherPluginSearchlocation', (10, 0, 650, 50))
+                    x2, y2, w2, h2 = skinparameter.get(
+                        'WeatherPluginSearchresult', (630, 0, 600, 50))
+                res = [
+                    (weatherlocationcode,
+                     searchlocation),
+                    (eListboxPythonMultiContent.TYPE_TEXT,
+                     x1,
+                     y1,
+                     w1,
+                     h1,
+                     1,
+                     RT_HALIGN_LEFT | RT_VALIGN_CENTER,
+                     searchlocation),
+                    (eListboxPythonMultiContent.TYPE_TEXT,
+                     x2,
+                     y2,
+                     w2,
+                     h2,
+                     1,
+                     RT_HALIGN_LEFT | RT_VALIGN_CENTER,
+                     searchresult)]
                 list.append(res)
 
         self.list = list

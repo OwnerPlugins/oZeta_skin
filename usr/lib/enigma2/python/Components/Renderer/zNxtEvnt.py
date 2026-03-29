@@ -19,7 +19,7 @@ try:
     import sys
     if sys.version_info[0] == 3:
         from builtins import range
-except:
+except BaseException:
     pass
 
 
@@ -49,7 +49,8 @@ class zNxtEvnt(Renderer, VariableText):
         try:
             ref = self.source.service
             if ref:
-                events = self.epgcache.lookupEvent(['IBDCT', (ref.toString(), 0, -1, 1200)])
+                events = self.epgcache.lookupEvent(
+                    ['IBDCT', (ref.toString(), 0, -1, 1200)])
                 if events and self.snglEvnt == "":
                     for i in range(int(self.nxEvnt)):
                         evnts = events[i + 1][4]
@@ -64,5 +65,5 @@ class zNxtEvnt(Renderer, VariableText):
                     return ""
             else:
                 return ""
-        except:
+        except BaseException:
             return ""

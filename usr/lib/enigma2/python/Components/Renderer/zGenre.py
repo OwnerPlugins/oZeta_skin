@@ -79,9 +79,13 @@ class zGenre(Renderer):
         if self.event and self.event != 'None' or self.event is not None:
             try:
                 if PY3:
-                    self.evnt = self.event.getEventName().replace('\xc2\x86', '').replace('\xc2\x87', '')  # .encode('utf-8')
+                    self.evnt = self.event.getEventName().replace(
+                        '\xc2\x86', '').replace(
+                        '\xc2\x87', '')  # .encode('utf-8')
                 else:
-                    self.evnt = self.event.getEventName().replace('\xc2\x86', '').replace('\xc2\x87', '').encode('utf-8')
+                    self.evnt = self.event.getEventName().replace(
+                        '\xc2\x86', '').replace(
+                        '\xc2\x87', '').encode('utf-8')
 
                 self.evntNm = convtext(self.evnt)
                 infos_file = "{}/{}".format(path_folder, self.evntNm)
@@ -133,10 +137,16 @@ class zGenre(Renderer):
                                 10767: ('Talk'),
                                 10768: ('War & Politics '),
                                 10770: ('TV Movie')}.get(gData.getLevel1(), "")[gData.getLevel2()]
-                    except:
+                    except BaseException:
                         pass
                 print('Genre Txt 11 : ', genreTxt)
-                png = "%s%s.png" % (PIC_PATH, re.sub("[^0-9a-z]+", "_", genreTxt.lower()).replace("__", "_").strip("_"))
+                png = "%s%s.png" % (PIC_PATH,
+                                    re.sub(
+                                        "[^0-9a-z]+",
+                                        "_",
+                                        genreTxt.lower()).replace(
+                                        "__",
+                                        "_").strip("_"))
                 if os.path.exists(png):
                     found = True
                     print('PNG name: ', png)
@@ -150,10 +160,10 @@ class zGenre(Renderer):
                     try:
                         print('No Found Genre : ', found)
                         return genreTxt
-                    except:
+                    except BaseException:
                         print('except No Found GenreTxt: ')
                         if self.instance:
                             self.instance.hide()
             except Exception as e:
-                print('zGenre error get event: ',  str(e))
+                print('zGenre error get event: ', str(e))
                 pass

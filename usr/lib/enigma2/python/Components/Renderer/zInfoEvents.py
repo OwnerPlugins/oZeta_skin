@@ -134,7 +134,8 @@ class zInfoEvents(Renderer, VariableText):
     def showInfos(self):
         self.event = self.source.event
         if self.event and self.event != 'None' or self.event is not None:
-            self.evnt = self.event.getEventName().replace('\xc2\x86', '').replace('\xc2\x87', '')
+            self.evnt = self.event.getEventName().replace(
+                '\xc2\x86', '').replace('\xc2\x87', '')
             if not self.event:
                 return
             if not PY3:
@@ -181,7 +182,8 @@ class zInfoEvents(Renderer, VariableText):
     def downloadInfos(self):
         self.year = self.filterSearch()
         try:
-            url_tmdb = "https://api.themoviedb.org/3/search/{}?api_key={}&query={}".format(self.srch, tmdb_api, quoteEventName(self.evntNm))
+            url_tmdb = "https://api.themoviedb.org/3/search/{}?api_key={}&query={}".format(
+                self.srch, tmdb_api, quoteEventName(self.evntNm))
             if self.year:
                 url_tmdb += "&year={}".format(self.year)
             print('downloadInfos url_tmdb=', url_tmdb)
@@ -193,7 +195,8 @@ class zInfoEvents(Renderer, VariableText):
                 except KeyError:
                     title = data_tmdb["results"][0]["original_name"]
                 print('downloadInfos Title: ', title)
-                url_omdb = "http://www.omdbapi.com/?apikey={}&t={}".format(omdb_api, quoteEventName(title))
+                url_omdb = "http://www.omdbapi.com/?apikey={}&t={}".format(
+                    omdb_api, quoteEventName(title))
                 print('downloadInfos url_omdb=', url_omdb)
                 response_omdb = urlopen(url_omdb)
                 data_omdb = json.load(response_omdb)
@@ -208,7 +211,9 @@ class zInfoEvents(Renderer, VariableText):
     def filterSearch(self):
         try:
             self.srch = "multi"
-            sd = "%s\n%s\n%s" % (self.event.getEventName(), self.event.getShortDescription(), self.event.getExtendedDescription())
+            sd = "%s\n%s\n%s" % (self.event.getEventName(),
+                                 self.event.getShortDescription(),
+                                 self.event.getExtendedDescription())
             keywords = [
                 "t/s", "Т/s", "SM", "d/s", "D/s", "stagione",
                 "Sig.", "episodio", "serie TV", "serie"
@@ -218,7 +223,9 @@ class zInfoEvents(Renderer, VariableText):
                     self.srch = "tv"
                     break
             years = re.findall(r'\d{4}', sd)
-            valid_years = [_y for _y in years if '1930' <= _y <= str(gmtime().tm_year)]
+            valid_years = [
+                _y for _y in years if '1930' <= _y <= str(
+                    gmtime().tm_year)]
             return valid_years[-1] if valid_years else None
         except Exception as e:
             print("Errore in filterSearch:", str(e))
@@ -235,14 +242,14 @@ class zInfoEvents(Renderer, VariableText):
                 self.infos_file = "{}/{}".format(path_folder, self.evntNm)
                 if not os.path.exists(self.infos_file):
                     self.downloadInfos()
-        except:
+        except BaseException:
             pass
 
     def delay2(self):
         self.timer = eTimer()
         try:
             self.timer_conn = self.timer.timeout.connect(self.dwn)
-        except:
+        except BaseException:
             self.timer.callback.append(self.dwn)
         self.timer.start(10, True)
 

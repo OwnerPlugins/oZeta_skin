@@ -18,11 +18,16 @@ def localeInit():
     if isDreamOS:
         lang = language.getLanguage()[:2]
         os.environ["LANGUAGE"] = lang
-    gettext.bindtextdomain(PluginLanguageDomain, resolveFilename(SCOPE_PLUGINS, PluginLanguagePath))
+    gettext.bindtextdomain(
+        PluginLanguageDomain,
+        resolveFilename(
+            SCOPE_PLUGINS,
+            PluginLanguagePath))
 
 
 if isDreamOS:
-    _ = lambda txt: gettext.dgettext(PluginLanguageDomain, txt) if txt else ""
+    def _(txt): return gettext.dgettext(
+        PluginLanguageDomain, txt) if txt else ""
     localeInit()
     language.addCallback(localeInit)
 else:
@@ -30,6 +35,7 @@ else:
         if gettext.dgettext(PluginLanguageDomain, txt):
             return gettext.dgettext(PluginLanguageDomain, txt)
         else:
-            print(("[%s] fallback to default translation for %s" % (PluginLanguageDomain, txt)))
+            print(("[%s] fallback to default translation for %s" %
+                  (PluginLanguageDomain, txt)))
             return gettext.gettext(txt)
     language.addCallback(localeInit())

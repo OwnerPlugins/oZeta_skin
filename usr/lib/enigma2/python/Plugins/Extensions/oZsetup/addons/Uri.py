@@ -8,18 +8,20 @@
 # NOT REMOVE DISCLAIMER!!!
 
 from __future__ import absolute_import
+from Tools import Notifications
 from Screens.MessageBox import MessageBox
 from Tools.Directories import fileExists
 print("oZeta Uri")
-from Tools import Notifications
 global CountConnOk
 CountConnOk = 0
 
 
-def zCheckInternet(opt=1, server=None, port=None):  # opt=5 custom server and port.
+# opt=5 custom server and port.
+def zCheckInternet(opt=1, server=None, port=None):
     global CountConnOk
     sock = False
-    checklist = [("8.8.4.4", 53), ("8.8.8.8", 53), ("www.e2skin.blogspot.com", 80), ("www.e2skin.blogspot.com", 443), ("www.google.com", 443)]
+    checklist = [("8.8.4.4", 53), ("8.8.8.8", 53), ("www.e2skin.blogspot.com",
+                                                    80), ("www.e2skin.blogspot.com", 443), ("www.google.com", 443)]
     if opt < 5:
         srv = checklist[opt]
     else:
@@ -31,7 +33,7 @@ def zCheckInternet(opt=1, server=None, port=None):  # opt=5 custom server and po
         sock = True
         CountConnOk = 0
         # print(_("Status Internet: %s:%s -> OK" % (srv[0],srv[1])))
-    except:
+    except BaseException:
         sock = False
         # print(_("Status Internet: %s:%s -> KO" % (srv[0],srv[1])))
         if CountConnOk == 0 and opt != 2 and opt != 3:
@@ -59,7 +61,7 @@ def upd_done():
         popen(cmd23)
     try:
         popen(cmd02)
-    except:
+    except BaseException:
         popen(cmd01)
     system('rm -rf /tmp/zsetup.tar')
     return
@@ -70,7 +72,7 @@ def logtmpdebug(data):
     redcolorend = '\033[m'
     print(redcolorinit + data + redcolorend)
     data = str(data)
-    open("/tmp/debug_my_skin.log", "a").write("\n"+":>"+data)
+    open("/tmp/debug_my_skin.log", "a").write("\n" + ":>" + data)
 
 
 def get_cpyright():
@@ -137,7 +139,7 @@ def imagevers():
             type = 'Unknow '
             print('type 6  ', str(type))
             return 'by Lululla'
-    except:
+    except BaseException:
         print('no line image- - -  ')
         return 'by Lululla'
     return
@@ -158,7 +160,7 @@ def zPicons(answer):
                 popen(cmd23)
             try:
                 popen(cmd02)
-            except:
+            except BaseException:
                 popen(cmd01)
             return
             system('rm -rf /tmp/mmpicons.tar')
@@ -182,7 +184,7 @@ def zXStreamop(answer=True):
                 popen(cmd23)
             try:
                 popen(cmd02)
-            except:
+            except BaseException:
                 popen(cmd01)
             return
             system('rm -rf /tmp/Zeta_4_xtreamity_opt.tar')
@@ -208,14 +210,17 @@ def zxOptions(answer=True):
                 popen(cmd23)
             try:
                 popen(cmd02)
-            except:
+            except BaseException:
                 popen(cmd01)
             time.sleep(2)
-            os.chmod("/usr/lib/enigma2/python/Plugins/Extensions/oZsetup/postUpd.sh", 0o0755)
+            os.chmod(
+                "/usr/lib/enigma2/python/Plugins/Extensions/oZsetup/postUpd.sh",
+                0o0755)
             cmd1 = ". /usr/lib/enigma2/python/Plugins/Extensions/oZsetup/postUpd.sh"
             system(cmd1)
             messageText = "Restart Gui Please"
-            Notifications.AddPopup(messageText, MessageBox.TYPE_INFO, timeout=5)
+            Notifications.AddPopup(
+                messageText, MessageBox.TYPE_INFO, timeout=5)
             print('upd_zz Done!!!')
             system('rm -rf /tmp/zsetup.tar')
             return

@@ -3,8 +3,27 @@ from Components.ActionMap import ActionMap
 
 
 class InputBox(InputBoxBase):
-    def __init__(self, session, title="", windowTitle=None, useableChars=None, overwrite=False, firstpos_end=False, allmarked=True, **kwargs):
-        InputBoxBase.__init__(self, session, title=title, windowTitle=windowTitle, useableChars=useableChars, maxSize=overwrite, currPos=firstpos_end and len(kwargs["text"].decode("utf-8")) or 0, allMarked=allmarked, **kwargs)
+    def __init__(
+            self,
+            session,
+            title="",
+            windowTitle=None,
+            useableChars=None,
+            overwrite=False,
+            firstpos_end=False,
+            allmarked=True,
+            **kwargs):
+        InputBoxBase.__init__(
+            self,
+            session,
+            title=title,
+            windowTitle=windowTitle,
+            useableChars=useableChars,
+            maxSize=overwrite,
+            currPos=firstpos_end and len(
+                kwargs["text"].decode("utf-8")) or 0,
+            allMarked=allmarked,
+            **kwargs)
 
         # Add action in InputBoxBase on KEY_DOWN
         self["actions"].actions["down"] = self.keyTab

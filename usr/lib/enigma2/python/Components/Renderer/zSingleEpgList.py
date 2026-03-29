@@ -29,7 +29,7 @@ class zSingleEpgList(Renderer, VariableText):
 
         if self.epgcache is not None:
             evt = self.epgcache.lookupEvent([
-                        'IBDCT', (service.toString(), 0, -1, -1)])
+                'IBDCT', (service.toString(), 0, -1, -1)])
         if evt:
             maxx = 0
             for x in evt:

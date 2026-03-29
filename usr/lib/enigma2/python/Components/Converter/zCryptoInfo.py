@@ -1,7 +1,8 @@
 #   GlamourAccess converter
 #   Modded and recoded by MCelliotG for use in Glamour skins or standalone, added Python3 support
 #   Based on CaidInfo2 converter coded by bigroma & 2boom
-#   If you use this Converter for other skins and rename it, please keep the lines above adding your credits below
+# If you use this Converter for other skins and rename it, please keep the
+# lines above adding your credits below
 
 from __future__ import absolute_import
 from Components.Converter.Converter import Converter
@@ -16,7 +17,7 @@ old_ecm_mtime = None
 try:
     config.softcam_actCam = ConfigText()
     config.softcam_actCam2 = ConfigText()
-except:
+except BaseException:
     pass
 
 
@@ -442,7 +443,8 @@ class zCryptoInfo(Poll, Converter):
                     if int(config.usage.show_cryptoinfo.value) > 0:
                         if source == "sci":
                             return True
-                        if source != "cache" and source != "net" and source.find("emu") == -1:
+                        if source != "cache" and source != "net" and source.find(
+                                "emu") == -1:
                             return True
                     return False
                 if self.type == self.CACHE:
@@ -452,7 +454,8 @@ class zCryptoInfo(Poll, Converter):
                     return False
                 if self.type == self.EMU:
                     if int(config.usage.show_cryptoinfo.value) > 0:
-                        return using == "emu" or source == "emu" or source == "card" or reader == "emu" or source.find("card") > -1 or source.find("emu") > -1 or source.find("biss") > -1 or source.find("tb") > -1 or reader.find("constant_cw") > -1 or protocol.find("constcw") > -1 or protocol.find("static") > -1
+                        return using == "emu" or source == "emu" or source == "card" or reader == "emu" or source.find("card") > -1 or source.find("emu") > -1 or source.find(
+                            "biss") > -1 or source.find("tb") > -1 or reader.find("constant_cw") > -1 or protocol.find("constcw") > -1 or protocol.find("static") > -1
                 if self.type == self.NET:
                     if int(config.usage.show_cryptoinfo.value) > 0:
                         if source == "net" and "unsupported" not in protocol and "cache" not in frm and "static" not in protocol and "fta" not in protocol:
@@ -482,13 +485,14 @@ class zCryptoInfo(Poll, Converter):
                     try:
                         caid = "%0.4X" % int(ecm_info.get("caid", ""), 16)
                         return "%s" % caidname
-                    except:
+                    except BaseException:
                         return "Unknown CA Info"
                 else:
                     return "CA Info not available"
 
             if info:
-                caids = list(set(info.getInfoObject(iServiceInformation.sCAIDs)))
+                caids = list(
+                    set(info.getInfoObject(iServiceInformation.sCAIDs)))
 
                 if self.type == self.CAMNAME:
                     return self.CamName()
@@ -510,7 +514,7 @@ class zCryptoInfo(Poll, Converter):
 
                         try:
                             pid = "%0.4X" % int(ecm_info.get("pid", ""), 16)
-                        except:
+                        except BaseException:
                             pid = ""
 
                         if self.type == self.PID:
@@ -518,22 +522,27 @@ class zCryptoInfo(Poll, Converter):
 
                         try:
                             prov = "%0.6X" % int(ecm_info.get("prov", ""), 16)
-                        except:
+                        except BaseException:
                             prov = ecm_info.get("prov", "")
 
                         if self.type == self.PROV:
                             return prov
 
                         if ecm_info.get("ecm time", "").find("msec") > -1:
-                            ecm_time = (ecm_info.get("ecm time", "")).replace("msec", "ms")
+                            ecm_time = (
+                                ecm_info.get(
+                                    "ecm time", "")).replace(
+                                "msec", "ms")
                         else:
-                            ecm_time = "%s ms" % ecm_info.get("ecm time", "").replace(".", "").lstrip("0")
+                            ecm_time = "%s ms" % ecm_info.get(
+                                "ecm time", "").replace(".", "").lstrip("0")
 
                         if self.type == self.ECMTIME:
                             return ecm_time
 
                         csi = "Service with %s encryption" % (caidtxt)
-                        casi = "Service with %s encryption (%s)" % (caidtxt, caidlist)
+                        casi = "Service with %s encryption (%s)" % (
+                            caidtxt, caidlist)
                         protocol = ecm_info.get("protocol", "")
                         port = ecm_info.get("port", "")
                         source = ecm_info.get("source", "")
@@ -560,7 +569,8 @@ class zCryptoInfo(Poll, Converter):
                             info_card = "False"
                             if source == "sci":
                                 info_card = "True"
-                            if source != "cache" and source != "net" and source.find("emu") == -1:
+                            if source != "cache" and source != "net" and source.find(
+                                    "emu") == -1:
                                 info_card = "True"
                             return info_card
 
@@ -605,7 +615,8 @@ class zCryptoInfo(Poll, Converter):
                                     elif param == "%n":
                                         ecminfo += "\n"
                                     elif param[1:].isdigit():
-                                        ecminfo = ecminfo.ljust(len(ecminfo) + int(param[1:]))
+                                        ecminfo = ecminfo.ljust(
+                                            len(ecminfo) + int(param[1:]))
                                     if len(ecminfo) > 0:
                                         if ecminfo[-1] != "\t" and ecminfo[-1] != "\n":
                                             ecminfo += " "
@@ -616,21 +627,28 @@ class zCryptoInfo(Poll, Converter):
                                 ecminfo = "FTA service"
                             elif int(config.usage.show_cryptoinfo.value) > 0:
                                 if source == "emu":
-                                    ecminfo = "CA: %s:%s  PID:%s  Source: %s@%s  Ecm Time: %s" % (caid, prov, pid, source, frm, ecm_time)
+                                    ecminfo = "CA: %s:%s  PID:%s  Source: %s@%s  Ecm Time: %s" % (
+                                        caid, prov, pid, source, frm, ecm_time)
                                 elif reader != "" and source == "net" and port != "":
-                                    ecminfo = "CA: %s:%s  PID:%s  Reader: %s@%s  Prtc:%s (%s)  Source: %s:%s %s  Ecm Time: %s  %s" % (caid, prov, pid, reader, frm, protocol, source, server, port, hops, ecm_time, provider)
+                                    ecminfo = "CA: %s:%s  PID:%s  Reader: %s@%s  Prtc:%s (%s)  Source: %s:%s %s  Ecm Time: %s  %s" % (
+                                        caid, prov, pid, reader, frm, protocol, source, server, port, hops, ecm_time, provider)
                                 elif reader != "" and source == "net" and "fta" not in protocol:
-                                    ecminfo = "CA: %s:%s  PID:%s  Reader: %s@%s  Ptrc:%s (%s)  Source: %s %s  Ecm Time: %s  %s" % (caid, prov, pid, reader, frm, protocol, source, server, hops, ecm_time, provider)
+                                    ecminfo = "CA: %s:%s  PID:%s  Reader: %s@%s  Ptrc:%s (%s)  Source: %s %s  Ecm Time: %s  %s" % (
+                                        caid, prov, pid, reader, frm, protocol, source, server, hops, ecm_time, provider)
                                 elif reader != "" and source != "net":
-                                    ecminfo = "CA: %s:%s  PID:%s  Reader: %s@%s  Prtc:%s (local) - %s %s  Ecm Time: %s  %s" % (caid, prov, pid, reader, frm, protocol, source, hops, ecm_time, provider)
+                                    ecminfo = "CA: %s:%s  PID:%s  Reader: %s@%s  Prtc:%s (local) - %s %s  Ecm Time: %s  %s" % (
+                                        caid, prov, pid, reader, frm, protocol, source, hops, ecm_time, provider)
                                 elif server == "" and port == "" and protocol != "":
-                                    ecminfo = "CA: %s:%s  PID:%s  Prtc: %s (%s) %s Ecm Time: %s" % (caid, prov, pid, protocol, source, hops, ecm_time)
+                                    ecminfo = "CA: %s:%s  PID:%s  Prtc: %s (%s) %s Ecm Time: %s" % (
+                                        caid, prov, pid, protocol, source, hops, ecm_time)
                                 elif server == "" and port == "" and protocol == "":
-                                    ecminfo = "CA: %s:%s  PID:%s  Source: %s  Ecm Time: %s" % (caid, prov, pid, source, ecm_time)
+                                    ecminfo = "CA: %s:%s  PID:%s  Source: %s  Ecm Time: %s" % (
+                                        caid, prov, pid, source, ecm_time)
                                 else:
                                     try:
-                                        ecminfo = "CA: %s:%s  PID:%s  Addr:%s:%s  Prtc: %s (%s) %s  Ecm Time: %s  %s" % (caid, prov, pid, server, port, protocol, source, hops, ecm_time, provider)
-                                    except:
+                                        ecminfo = "CA: %s:%s  PID:%s  Addr:%s:%s  Prtc: %s (%s) %s  Ecm Time: %s  %s" % (
+                                            caid, prov, pid, server, port, protocol, source, hops, ecm_time, provider)
+                                    except BaseException:
                                         pass
                             else:
                                 ecminfo = casi
@@ -640,22 +658,28 @@ class zCryptoInfo(Poll, Converter):
                                 ecminfo = "FTA service"
                             elif int(config.usage.show_cryptoinfo.value) > 0:
                                 if source == "emu":
-                                    ecminfo = "%s:%s - %s - %s" % (caid, prov, source, caidname)
+                                    ecminfo = "%s:%s - %s - %s" % (
+                                        caid, prov, source, caidname)
                                 elif server == "" and port == "":
-                                    ecminfo = "%s:%s - %s - %s" % (caid, prov, source, ecm_time)
+                                    ecminfo = "%s:%s - %s - %s" % (
+                                        caid, prov, source, ecm_time)
                                 else:
                                     try:
                                         if reader != "":
                                             if hop != "":
-                                                ecminfo = "%s:%s - %s (%s) - %s" % (caid, prov, frm, hop, ecm_time)
+                                                ecminfo = "%s:%s - %s (%s) - %s" % (
+                                                    caid, prov, frm, hop, ecm_time)
                                             else:
-                                                ecminfo = "%s:%s - %s - %s" % (caid, prov, frm, ecm_time)
+                                                ecminfo = "%s:%s - %s - %s" % (
+                                                    caid, prov, frm, ecm_time)
                                         else:
                                             if hop != "":
-                                                ecminfo = "%s:%s - %s (%s) - %s" % (caid, prov, server, hop, ecm_time)
+                                                ecminfo = "%s:%s - %s (%s) - %s" % (
+                                                    caid, prov, server, hop, ecm_time)
                                             else:
-                                                ecminfo = "%s:%s - %s - %s" % (caid, prov, server, ecm_time)
-                                    except:
+                                                ecminfo = "%s:%s - %s - %s" % (
+                                                    caid, prov, server, ecm_time)
+                                    except BaseException:
                                         pass
                             else:
                                 ecminfo = csi
@@ -665,26 +689,32 @@ class zCryptoInfo(Poll, Converter):
                                 ecminfo = "FTA service"
                             elif int(config.usage.show_cryptoinfo.value) > 0:
                                 if source == "emu" or server == "" and port == "":
-                                    ecminfo = "%s [%s:%s - %s - %s]" % (csi, caid, prov, source, ecm_time)
+                                    ecminfo = "%s [%s:%s - %s - %s]" % (
+                                        csi, caid, prov, source, ecm_time)
                                 else:
                                     try:
                                         if reader != "":
                                             if hop != "":
-                                                ecminfo = "%s [%s:%s - %s@%s - %s]" % (csi, caid, prov, reader, hop, ecm_time)
+                                                ecminfo = "%s [%s:%s - %s@%s - %s]" % (
+                                                    csi, caid, prov, reader, hop, ecm_time)
                                             else:
-                                                ecminfo = "%s [%s:%s - %s - %s]" % (csi, caid, prov, reader, ecm_time)
+                                                ecminfo = "%s [%s:%s - %s - %s]" % (
+                                                    csi, caid, prov, reader, ecm_time)
                                         else:
                                             if hop != "":
-                                                ecminfo = "%s [%s:%s - %s@%s - %s]" % (csi, caid, prov, server, hop, ecm_time)
+                                                ecminfo = "%s [%s:%s - %s@%s - %s]" % (
+                                                    csi, caid, prov, server, hop, ecm_time)
                                             else:
-                                                ecminfo = "%s [%s:%s - %s - %s]" % (csi, caid, prov, server, ecm_time)
-                                    except:
+                                                ecminfo = "%s [%s:%s - %s - %s]" % (
+                                                    csi, caid, prov, server, ecm_time)
+                                    except BaseException:
                                         pass
                             else:
                                 ecminfo = csi
 
                     elif self.type == self.ECMINFO or self.type == self.FORMAT and self.sfmt.count("%") > 3:
-                        ecminfo = "Service with %s encryption (%s)" % (caidtxt, caidlist)
+                        ecminfo = "Service with %s encryption (%s)" % (
+                            caidtxt, caidlist)
                     elif self.type == self.SHORTINFO or self.type == self.CASINFO:
                         ecminfo = "Service with %s encryption" % caidtxt
                 elif self.type == self.ECMINFO or self.type == self.SHORTINFO or self.type == self.CASINFO or self.type == self.FORMAT and self.sfmt.count("%") > 3:
@@ -701,7 +731,8 @@ class zCryptoInfo(Poll, Converter):
         camdname = []
         sername = []
 # OpenPLI/SatDreamGr
-        if os.path.exists("/etc/init.d/softcam") and not os.path.exists("/etc/image-version") or os.path.exists("/etc/init.d/cardserver") and not os.path.exists("/etc/image-version"):
+        if os.path.exists("/etc/init.d/softcam") and not os.path.exists("/etc/image-version") or os.path.exists(
+                "/etc/init.d/cardserver") and not os.path.exists("/etc/image-version"):
             try:
                 for line in open("/etc/init.d/softcam"):
                     if line.startswith("CAMNAME="):
@@ -714,14 +745,14 @@ class zCryptoInfo(Poll, Converter):
                 else:
                     camdlist = cam1
                 return camdlist
-            except:
+            except BaseException:
                 pass
             try:
                 for line in open("/etc/init.d/cardserver"):
                     if line.find("echo") > -1:
                         sername.append(line)
                 serlist = "%s" % sername[1].split('"')[1]
-            except:
+            except BaseException:
                 pass
             if serlist is None:
                 serlist = ""
@@ -732,7 +763,8 @@ class zCryptoInfo(Poll, Converter):
                 camdlist = ""
             return "%s %s" % (serlist, camdlist)
 # OE-A
-        if os.path.exists("/etc/image-version") and not os.path.exists("/etc/.emustart"):
+        if os.path.exists(
+                "/etc/image-version") and not os.path.exists("/etc/.emustart"):
             for line in open("/etc/image-version"):
                 if "=openATV" in line:
                     try:
@@ -746,21 +778,24 @@ class zCryptoInfo(Poll, Converter):
                                 cam2 = ""
                             else:
                                 cam2 = "+" + cam2
-                    except:
+                    except BaseException:
                         pass
                     try:
                         if os.path.exists("/tmp/.oscam/oscam.version"):
                             for line in open("/tmp/.oscam/oscam.version"):
                                 if line.startswith("Version:"):
-                                    cam1 = "%s" % line.split('@')[0].replace(" ", "").replace("Version:", "")
+                                    cam1 = "%s" % line.split(
+                                        '@')[0].replace(" ", "").replace("Version:", "")
                         elif os.path.exists("/tmp/.ncam/ncam.version"):
                             for line in open("/tmp/.ncam/ncam.version"):
                                 if line.startswith("Version:"):
-                                    cam1 = "%s" % line.split('@')[0].replace(" ", "").replace("Version:", "")
+                                    cam1 = "%s" % line.split(
+                                        '@')[0].replace(" ", "").replace("Version:", "")
                         else:
                             for line in open("/etc/init.d/softcam"):
                                 if "Short-Description" in line:
-                                    cam1 = "%s" % line.split(':')[1].replace(" ", "")
+                                    cam1 = "%s" % line.split(
+                                        ':')[1].replace(" ", "")
                                 if line.startswith("CAMNAME="):
                                     cam1 = "%s" % line.split('"')[1]
                                 elif line.find("echo") > -1:
@@ -770,7 +805,7 @@ class zCryptoInfo(Poll, Converter):
                             return cam2
                         else:
                             return cam1
-                    except:
+                    except BaseException:
                         pass
                     try:
                         for line in open("/etc/init.d/cardserver"):
@@ -779,7 +814,7 @@ class zCryptoInfo(Poll, Converter):
                         cam2 = " %s" % sername[1].split('"')[1]
                         if not cam2 or cam2 == "None":
                             cam2 = ""
-                    except:
+                    except BaseException:
                         pass
                 elif "=teamBlue" in line:
                     try:
@@ -793,21 +828,24 @@ class zCryptoInfo(Poll, Converter):
                                 cam2 = ""
                             else:
                                 cam2 = "+" + cam2
-                    except:
+                    except BaseException:
                         pass
                     try:
                         if os.path.exists("/tmp/.oscam/oscam.version"):
                             for line in open("/tmp/.oscam/oscam.version"):
                                 if line.startswith("Version:"):
-                                    cam1 = "%s" % line.split('@')[0].replace(" ", "").replace("Version:", "")
+                                    cam1 = "%s" % line.split(
+                                        '@')[0].replace(" ", "").replace("Version:", "")
                         elif os.path.exists("/tmp/.ncam/ncam.version"):
                             for line in open("/tmp/.ncam/ncam.version"):
                                 if line.startswith("Version:"):
-                                    cam1 = "%s" % line.split('@')[0].replace(" ", "").replace("Version:", "")
+                                    cam1 = "%s" % line.split(
+                                        '@')[0].replace(" ", "").replace("Version:", "")
                         else:
                             for line in open("/etc/init.d/softcam"):
                                 if "Short-Description" in line:
-                                    cam1 = "%s" % line.split(':')[1].replace(" ", "")
+                                    cam1 = "%s" % line.split(
+                                        ':')[1].replace(" ", "")
                                 if line.startswith("CAMNAME="):
                                     cam1 = "%s" % line.split('"')[1]
                                 elif line.find("echo") > -1:
@@ -817,7 +855,7 @@ class zCryptoInfo(Poll, Converter):
                             return cam2
                         else:
                             return cam1
-                    except:
+                    except BaseException:
                         pass
                     try:
                         for line in open("/etc/init.d/cardserver"):
@@ -826,7 +864,7 @@ class zCryptoInfo(Poll, Converter):
                         cam2 = " %s" % sername[1].split('"')[1]
                         if not cam2 or cam2 == "None":
                             cam2 = ""
-                    except:
+                    except BaseException:
                         pass
                 elif "=openvix" in line:
                     try:
@@ -840,21 +878,24 @@ class zCryptoInfo(Poll, Converter):
                                 cam2 = ""
                             else:
                                 cam2 = "+" + cam2
-                    except:
+                    except BaseException:
                         pass
                     try:
                         if os.path.exists("/tmp/.oscam/oscam.version"):
                             for line in open("/tmp/.oscam/oscam.version"):
                                 if line.startswith("Version:"):
-                                    cam1 = "%s" % line.split('@')[0].replace(" ", "").replace("Version:", "")
+                                    cam1 = "%s" % line.split(
+                                        '@')[0].replace(" ", "").replace("Version:", "")
                         elif os.path.exists("/tmp/.ncam/ncam.version"):
                             for line in open("/tmp/.ncam/ncam.version"):
                                 if line.startswith("Version:"):
-                                    cam1 = "%s" % line.split('@')[0].replace(" ", "").replace("Version:", "")
+                                    cam1 = "%s" % line.split(
+                                        '@')[0].replace(" ", "").replace("Version:", "")
                         else:
                             for line in open("/etc/init.d/softcam"):
                                 if "Short-Description" in line:
-                                    cam1 = "%s" % line.split(':')[1].replace(" ", "")
+                                    cam1 = "%s" % line.split(
+                                        ':')[1].replace(" ", "")
                                 if line.startswith("CAMNAME="):
                                     cam1 = "%s" % line.split('"')[1]
                                 elif line.find("echo") > -1:
@@ -864,7 +905,7 @@ class zCryptoInfo(Poll, Converter):
                             return cam2
                         else:
                             return cam1
-                    except:
+                    except BaseException:
                         pass
                     try:
                         for line in open("/etc/init.d/cardserver"):
@@ -873,7 +914,7 @@ class zCryptoInfo(Poll, Converter):
                         cam2 = " %s" % sername[1].split('"')[1]
                         if not cam2 or cam2 == "None":
                             cam2 = ""
-                    except:
+                    except BaseException:
                         pass
                 elif "=openbh" in line:
                     try:
@@ -887,21 +928,24 @@ class zCryptoInfo(Poll, Converter):
                                 cam2 = ""
                             else:
                                 cam2 = "+" + cam2
-                    except:
+                    except BaseException:
                         pass
                     try:
                         if os.path.exists("/tmp/.oscam/oscam.version"):
                             for line in open("/tmp/.oscam/oscam.version"):
                                 if line.startswith("Version:"):
-                                    cam1 = "%s" % line.split('@')[0].replace(" ", "").replace("Version:", "")
+                                    cam1 = "%s" % line.split(
+                                        '@')[0].replace(" ", "").replace("Version:", "")
                         elif os.path.exists("/tmp/.ncam/ncam.version"):
                             for line in open("/tmp/.ncam/ncam.version"):
                                 if line.startswith("Version:"):
-                                    cam1 = "%s" % line.split('@')[0].replace(" ", "").replace("Version:", "")
+                                    cam1 = "%s" % line.split(
+                                        '@')[0].replace(" ", "").replace("Version:", "")
                         else:
                             for line in open("/usr/camscript/Ncam"):
                                 if "Short-Description" in line:
-                                    cam1 = "%s" % line.split(':')[1].replace(" ", "")
+                                    cam1 = "%s" % line.split(
+                                        ':')[1].replace(" ", "")
                                 if line.startswith("CAMNAME="):
                                     cam1 = "%s" % line.split('"')[1]
                                 elif line.find("echo") > -1:
@@ -911,7 +955,7 @@ class zCryptoInfo(Poll, Converter):
                             return cam2
                         else:
                             return cam1
-                    except:
+                    except BaseException:
                         pass
                     try:
                         for line in open("/etc/init.d/cardserver"):
@@ -920,7 +964,7 @@ class zCryptoInfo(Poll, Converter):
                         cam2 = " %s" % sername[1].split('"')[1]
                         if not cam2 or cam2 == "None":
                             cam2 = ""
-                    except:
+                    except BaseException:
                         pass
                 elif "=egamimod" in line:
                     try:
@@ -934,21 +978,24 @@ class zCryptoInfo(Poll, Converter):
                                 cam2 = ""
                             else:
                                 cam2 = "+" + cam2
-                    except:
+                    except BaseException:
                         pass
                     try:
                         if os.path.exists("/tmp/.oscam/oscam.version"):
                             for line in open("/tmp/.oscam/oscam.version"):
                                 if line.startswith("Version:"):
-                                    cam1 = "%s" % line.split(':')[1].replace(" ", "")
+                                    cam1 = "%s" % line.split(
+                                        ':')[1].replace(" ", "")
                         elif os.path.exists("/tmp/.ncam/ncam.version"):
                             for line in open("/tmp/.ncam/ncam.version"):
                                 if line.startswith("Version:"):
-                                    cam1 = "%s" % line.split(':')[1].replace(" ", "")
+                                    cam1 = "%s" % line.split(
+                                        ':')[1].replace(" ", "")
                         else:
                             for line in open("/usr/emu_scripts/EGcam"):
                                 if "Short-Description" in line:
-                                    cam1 = "%s" % line.split(':')[1].replace(" ", "")
+                                    cam1 = "%s" % line.split(
+                                        ':')[1].replace(" ", "")
                                 if line.startswith("CAMNAME="):
                                     cam1 = "%s" % line.split('"')[1]
                                 elif line.find("echo") > -1:
@@ -958,7 +1005,7 @@ class zCryptoInfo(Poll, Converter):
                             return cam2
                         else:
                             return cam1
-                    except:
+                    except BaseException:
                         pass
                     try:
                         for line in open("/etc/init.d/cardserver"):
@@ -967,7 +1014,7 @@ class zCryptoInfo(Poll, Converter):
                         cam2 = " %s" % sername[1].split('"')[1]
                         if not cam2 or cam2 == "None":
                             cam2 = ""
-                    except:
+                    except BaseException:
                         pass
                 elif "=opendroid" in line:
                     try:
@@ -981,21 +1028,24 @@ class zCryptoInfo(Poll, Converter):
                                 cam2 = ""
                             else:
                                 cam2 = "+" + cam2
-                    except:
+                    except BaseException:
                         pass
                     try:
                         if os.path.exists("/tmp/.oscam/oscam.version"):
                             for line in open("/tmp/.oscam/oscam.version"):
                                 if line.startswith("Version:"):
-                                    cam1 = "%s" % line.split(':')[1].replace(" ", "")
+                                    cam1 = "%s" % line.split(
+                                        ':')[1].replace(" ", "")
                         elif os.path.exists("/tmp/.ncam/ncam.version"):
                             for line in open("/tmp/.ncam/ncam.version"):
                                 if line.startswith("Version:"):
-                                    cam1 = "%s" % line.split(':')[1].replace(" ", "")
+                                    cam1 = "%s" % line.split(
+                                        ':')[1].replace(" ", "")
                         else:
                             for line in open("/etc/init.d/softcam"):
                                 if "Short-Description" in line:
-                                    cam1 = "%s" % line.split(':')[1].replace(" ", "")
+                                    cam1 = "%s" % line.split(
+                                        ':')[1].replace(" ", "")
                                 if line.startswith("CAMNAME="):
                                     cam1 = "%s" % line.split('"')[1]
                                 elif line.find("echo") > -1:
@@ -1005,7 +1055,7 @@ class zCryptoInfo(Poll, Converter):
                             return cam2
                         else:
                             return cam1
-                    except:
+                    except BaseException:
                         pass
                     try:
                         for line in open("/etc/init.d/cardserver"):
@@ -1014,7 +1064,7 @@ class zCryptoInfo(Poll, Converter):
                         cam2 = " %s" % sername[1].split('"')[1]
                         if not cam2 or cam2 == "None":
                             cam2 = ""
-                    except:
+                    except BaseException:
                         pass
                 elif "=satlodge" in line:
                     try:
@@ -1028,11 +1078,12 @@ class zCryptoInfo(Poll, Converter):
                                 cam2 = ""
                             else:
                                 cam2 = "/" + cam2
-                    except:
+                    except BaseException:
                         pass
             return "%s%s" % (cam1, cam2)
 # OpenVix_script
-        if os.path.exists("/etc/image-version") and os.path.exists("/usr/lib/enigma2/python/Plugins/SystemPlugins/ViX/SoftcamManager.pyc"):
+        if os.path.exists("/etc/image-version") and os.path.exists(
+                "/usr/lib/enigma2/python/Plugins/SystemPlugins/ViX/SoftcamManager.pyc"):
             for line in open("/etc/image-version"):
                 if "OpenViX" in line:
                     try:
@@ -1046,21 +1097,24 @@ class zCryptoInfo(Poll, Converter):
                                 cam2 = ""
                             else:
                                 cam2 = "+" + cam2
-                    except:
+                    except BaseException:
                         pass
                     try:
                         if os.path.exists("/tmp/.oscam/oscam.version"):
                             for line in open("/tmp/.oscam/oscam.version"):
                                 if line.startswith("Version:"):
-                                    cam1 = "%s" % line.split(':')[1].replace(" ", "")
+                                    cam1 = "%s" % line.split(
+                                        ':')[1].replace(" ", "")
                         elif os.path.exists("/tmp/.ncam/ncam.version"):
                             for line in open("/tmp/.ncam/ncam.version"):
                                 if line.startswith("Version:"):
-                                    cam1 = "%s" % line.split(':')[1].replace(" ", "")
+                                    cam1 = "%s" % line.split(
+                                        ':')[1].replace(" ", "")
                         else:
                             for line in open("/etc/init.d/softcam"):
                                 if "Short-Description" in line:
-                                    cam1 = "%s" % line.split(':')[1].replace(" ", "")
+                                    cam1 = "%s" % line.split(
+                                        ':')[1].replace(" ", "")
                                 if line.startswith("CAMNAME="):
                                     cam1 = "%s" % line.split('"')[1]
                                 elif line.find("echo") > -1:
@@ -1070,7 +1124,7 @@ class zCryptoInfo(Poll, Converter):
                             return cam2
                         else:
                             return cam1
-                    except:
+                    except BaseException:
                         pass
                     try:
                         for line in open("/etc/init.d/cardserver"):
@@ -1079,21 +1133,22 @@ class zCryptoInfo(Poll, Converter):
                         cam2 = " %s" % sername[1].split('"')[1]
                         if not cam2 or cam2 == "None":
                             cam2 = ""
-                    except:
+                    except BaseException:
                         pass
 # BLACKHOLE
         if os.path.exists("/etc/CurrentDelCamName"):
             try:
                 camdlist = open("/etc/CurrentDelCamName", "r")
-            except:
+            except BaseException:
                 return None
         if os.path.exists("/etc/CurrentBhCamName"):
             try:
                 camdlist = open("/etc/CurrentBhCamName", "r")
-            except:
+            except BaseException:
                 return None
 # DE-OpenBlackHole
-        if os.path.exists("/etc/image-version") and os.path.exists("/etc/BhCamConf"):
+        if os.path.exists(
+                "/etc/image-version") and os.path.exists("/etc/BhCamConf"):
             for line in open("/etc/image-version"):
                 if "OpenBh" in line:
                     try:
@@ -1107,21 +1162,24 @@ class zCryptoInfo(Poll, Converter):
                                 cam2 = ""
                             else:
                                 cam2 = "+" + cam2
-                    except:
+                    except BaseException:
                         pass
                     try:
                         if os.path.exists("/tmp/.oscam/oscam.version"):
                             for line in open("/tmp/.oscam/oscam.version"):
                                 if line.startswith("Version:"):
-                                    cam1 = "%s" % line.split('@')[0].replace(" ", "").replace("Version:", "")
+                                    cam1 = "%s" % line.split(
+                                        '@')[0].replace(" ", "").replace("Version:", "")
                         elif os.path.exists("/tmp/.ncam/ncam.version"):
                             for line in open("/tmp/.ncam/ncam.version"):
                                 if line.startswith("Version:"):
-                                    cam1 = "%s" % line.split('@')[0].replace(" ", "").replace("Version:", "")
+                                    cam1 = "%s" % line.split(
+                                        '@')[0].replace(" ", "").replace("Version:", "")
                         else:
                             for line in open("/usr/camscript/Ncam"):
                                 if "Short-Description" in line:
-                                    cam1 = "%s" % line.split(':')[1].replace(" ", "")
+                                    cam1 = "%s" % line.split(
+                                        ':')[1].replace(" ", "")
                                 if line.startswith("CAMNAME="):
                                     cam1 = "%s" % line.split('"')[1]
                                 elif line.find("echo") > -1:
@@ -1131,7 +1189,7 @@ class zCryptoInfo(Poll, Converter):
                             return cam2
                         else:
                             return cam1
-                    except:
+                    except BaseException:
                         pass
                     try:
                         for line in open("/etc/init.d/cardserver"):
@@ -1140,20 +1198,21 @@ class zCryptoInfo(Poll, Converter):
                         cam2 = " %s" % sername[1].split('"')[1]
                         if not cam2 or cam2 == "None":
                             cam2 = ""
-                    except:
+                    except BaseException:
                         pass
 # HDMU
-        if os.path.exists("/etc/.emustart") and os.path.exists("/etc/image-version"):
+        if os.path.exists(
+                "/etc/.emustart") and os.path.exists("/etc/image-version"):
             try:
                 for line in open("/etc/.emustart"):
                     return line.split()[0].split("/")[-1]
-            except:
+            except BaseException:
                 return None
 # Domica
         if os.path.exists("/etc/active_emu.list"):
             try:
                 camdlist = open("/etc/active_emu.list", "r")
-            except:
+            except BaseException:
                 return None
 # Egami
         if os.path.exists("/tmp/egami.inf"):
@@ -1163,25 +1222,25 @@ class zCryptoInfo(Poll, Converter):
                     item = line.split(":", 1)
                     if item[0] == "Current emulator":
                         return item[1].strip()
-            except:
+            except BaseException:
                 return None
 # OoZooN
         if os.path.exists("/tmp/cam.info"):
             try:
                 camdlist = open("/tmp/cam.info", "r")
-            except:
+            except BaseException:
                 return None
 # Dream Elite
         if os.path.exists("/usr/bin/emuactive"):
             try:
                 camdlist = open("/usr/bin/emuactive", "r")
-            except:
+            except BaseException:
                 return None
 # Merlin2
         if os.path.exists("/etc/clist.list"):
             try:
                 camdlist = open("/etc/clist.list", "r")
-            except:
+            except BaseException:
                 return None
 # TS-Panel
         if os.path.exists("/etc/startcam.sh"):
@@ -1189,13 +1248,13 @@ class zCryptoInfo(Poll, Converter):
                 for line in open("/etc/startcam.sh"):
                     if line.find("script") > -1:
                         return "%s" % line.split("/")[-1].split()[0][:-3]
-            except:
+            except BaseException:
                 camdlist = None
 #  GlassSysUtil
         if os.path.exists("/tmp/ucm_cam.info"):
             try:
                 return open("/tmp/ucm_cam.info").read()
-            except:
+            except BaseException:
                 return None
 # Others
         if serlist is not None:
@@ -1204,7 +1263,7 @@ class zCryptoInfo(Poll, Converter):
                 for current in serlist.readlines():
                     cardserver = current
                 serlist.close()
-            except:
+            except BaseException:
                 pass
         else:
             cardserver = "N/A"
@@ -1214,7 +1273,7 @@ class zCryptoInfo(Poll, Converter):
                 for current in camdlist.readlines():
                     emu = current
                 camdlist.close()
-            except:
+            except BaseException:
                 pass
         else:
             emu = "N/A"
@@ -1229,7 +1288,8 @@ class zCryptoInfo(Poll, Converter):
         if service:
             info = service and service.info()
             if info:
-                caids = list(set(info.getInfoObject(iServiceInformation.sCAIDs)))
+                caids = list(
+                    set(info.getInfoObject(iServiceInformation.sCAIDs)))
         return sorted(caids)
 
     def CaidList(self):
@@ -1239,7 +1299,8 @@ class zCryptoInfo(Poll, Converter):
             for caid in caids:
                 caid = self.int2hex(caid).upper().zfill(4)
                 if len(caids) > 1:
-                    caidlist = ", ".join(("{:04x}".format(x) for x in caids)).upper()
+                    caidlist = ", ".join(
+                        ("{:04x}".format(x) for x in caids)).upper()
                 else:
                     caidlist += caid
         return caidlist
@@ -1253,7 +1314,7 @@ class zCryptoInfo(Poll, Converter):
                 try:
                     if ce[0] <= caidr <= ce[1] or caidr.startswith(ce[0]):
                         caidname = ce[2]
-                except:
+                except BaseException:
                     pass
         return caidname
 
@@ -1283,7 +1344,8 @@ class zCryptoInfo(Poll, Converter):
                         calist.append(ca)
                         calist = list(calist)
                         if len(calist) > 1:
-                            caidtxt = ", ".join(calist[:-1]) + " & " + calist[-1]
+                            caidtxt = ", ".join(
+                                calist[:-1]) + " & " + calist[-1]
                         else:
                             caidtxt = calist[0]
         return caidtxt
@@ -1328,7 +1390,7 @@ class zCryptoInfo(Poll, Converter):
         else:
             try:
                 ecmpath = "/tmp/ecm.info"
-            except:
+            except BaseException:
                 pass
         return ecmpath
 
@@ -1348,7 +1410,7 @@ class zCryptoInfo(Poll, Converter):
                 old_ecm_mtime = ecm_mtime
                 ecmf = open(ecmpath, "r")
                 ecm = ecmf.readlines()
-            except:
+            except BaseException:
                 old_ecm_mtime = None
                 info = {}
                 return info
@@ -1369,20 +1431,24 @@ class zCryptoInfo(Poll, Converter):
                                 info["source"] = "net"
                                 it_tmp = item[1].strip().split(" ")
                                 info["ecm time"] = "%s msec" % it_tmp[0]
-                                info["reader"] = it_tmp[-1].strip('R0[').strip(']')
+                                info["reader"] = it_tmp[-1].strip(
+                                    'R0[').strip(']')
                                 y = it_tmp[-1].find("[")
                                 if y != -1:
                                     info["server"] = it_tmp[-1][:y]
                                     info["protocol"] = it_tmp[-1][y + 1: -1]
                                 y = it_tmp[-1].find("(")
                                 if y != -1:
-                                    info["server"] = it_tmp[-1].split("(")[-1].split(":")[0]
-                                    info["port"] = it_tmp[-1].split("(")[-1].split(":")[-1].rstrip(")")
+                                    info["server"] = it_tmp[-1].split(
+                                        "(")[-1].split(":")[0]
+                                    info["port"] = it_tmp[-1].split(
+                                        "(")[-1].split(":")[-1].rstrip(")")
                                     info["reader"] = it_tmp[-2]
                                 elif y == -1:
                                     item[0] = "source"
                                     item[1] = "sci"
-                                if it_tmp[-1].find("emu") > -1 or it_tmp[-1].find("card") > -1 or it_tmp[-1].find("biss") > -1 or it_tmp[-1].find("tb") > -1:
+                                if it_tmp[-1].find("emu") > -1 or it_tmp[-1].find(
+                                        "card") > -1 or it_tmp[-1].find("biss") > -1 or it_tmp[-1].find("tb") > -1:
                                     item[0] = "source"
                                     item[1] = "emu"
                             elif item[0] == "hops":
@@ -1400,13 +1466,17 @@ class zCryptoInfo(Poll, Converter):
                                     it_tmp = item[1].strip().split(" ")
                                     info["protocol"] = it_tmp[1][1:]
                                     if ":" in it_tmp[-1]:
-                                        info["server"] = it_tmp[-1].split(":", 1)[0]
-                                        info["port"] = it_tmp[-1].split(":", 1)[1][:-1]
+                                        info["server"] = it_tmp[-1].split(":", 1)[
+                                            0]
+                                        info["port"] = it_tmp[-1].split(":", 1)[
+                                            1][:-1]
                                     elif ":" not in it_tmp[-1]:
                                         try:
-                                            info["server"] = it_tmp[3].split(":", 1)[0]
-                                            info["port"] = it_tmp[3].split(":", 1)[1][:-1]
-                                        except:
+                                            info["server"] = it_tmp[3].split(":", 1)[
+                                                0]
+                                            info["port"] = it_tmp[3].split(":", 1)[
+                                                1][:-1]
+                                        except BaseException:
                                             pass
                                     else:
                                         info["server"] == ""
@@ -1420,7 +1490,8 @@ class zCryptoInfo(Poll, Converter):
                                 if item[1].strip() == "emu":
                                     item[0] = "source"
                             elif item[0] == "protocol":
-                                if item[1].strip() == "emu" or item[1].strip() == "constcw":
+                                if item[1].strip(
+                                ) == "emu" or item[1].strip() == "constcw":
                                     item[1] = "emu"
                                     item[0] = "source"
                                 elif item[1].strip() == "internal":
@@ -1432,7 +1503,8 @@ class zCryptoInfo(Poll, Converter):
                             elif item[0] == "provid":
                                 item[0] = "prov"
                             elif item[0] == "using":
-                                if item[1].strip() == "emu" or item[1].strip() == "sci":
+                                if item[1].strip(
+                                ) == "emu" or item[1].strip() == "sci":
                                     item[0] = "source"
                                 else:
                                     info["source"] = "net"

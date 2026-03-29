@@ -39,7 +39,7 @@ import time
 try:
     from Components.WeatherMSN import weathermsn
     WeatherMSNComp = weathermsn
-except:
+except BaseException:
     WeatherMSNComp = None
 
 
@@ -54,7 +54,15 @@ def main(session, **kwargs):
 
 
 def Plugins(**kwargs):
-    list = [PluginDescriptor(name=_("Weather Plugin"), description=_("Show Weather Forecast"), where=[PluginDescriptor.WHERE_PLUGINMENU, PluginDescriptor.WHERE_EXTENSIONSMENU], icon="weather.png", fnc=main)]
+    list = [
+        PluginDescriptor(
+            name=_("Weather Plugin"),
+            description=_("Show Weather Forecast"),
+            where=[
+                PluginDescriptor.WHERE_PLUGINMENU,
+                PluginDescriptor.WHERE_EXTENSIONSMENU],
+            icon="weather.png",
+            fnc=main)]
     return list
 
 
@@ -92,15 +100,17 @@ class MSNWeatherPlugin(Screen):
     def __init__(self, session):
         Screen.__init__(self, session)
         self.title = _("Weather Plugin")
-        self["actions"] = ActionMap(["WizardActions", "DirectionActions", "ColorActions", "EPGSelectActions"],
-        {
-            "back": self.close,
-            "input_date_time": self.config,
-            "right": self.nextItem,
-            "left": self.previousItem,
-            "menu": self.showsetup,
-            "info": self.showWebsite
-        }, -1)
+        self["actions"] = ActionMap(["WizardActions",
+                                     "DirectionActions",
+                                     "ColorActions",
+                                     "EPGSelectActions"],
+                                    {"back": self.close,
+                                     "input_date_time": self.config,
+                                     "right": self.nextItem,
+                                     "left": self.previousItem,
+                                     "menu": self.showsetup,
+                                     "info": self.showWebsite},
+                                    -1)
 
         self["statustext"] = StaticText()
         self["currenticon"] = WeatherIcon()
@@ -142,9 +152,15 @@ class MSNWeatherPlugin(Screen):
                 self.weatherData.cancel()
                 self.weatherData = None
             self.weatherData = MSNWeather()
-            self.weatherData.getWeatherData(self.weatherPluginEntry.degreetype.value, self.weatherPluginEntry.weatherlocationcode.value, self.weatherPluginEntry.city.value, self.getWeatherDataCallback, self.showIcon)
+            self.weatherData.getWeatherData(
+                self.weatherPluginEntry.degreetype.value,
+                self.weatherPluginEntry.weatherlocationcode.value,
+                self.weatherPluginEntry.city.value,
+                self.getWeatherDataCallback,
+                self.showIcon)
         else:
-            self["statustext"].text = _("No locations defined...\nPress 'Menu' to do that.")
+            self["statustext"].text = _(
+                "No locations defined...\nPress 'Menu' to do that.")
 
     def nextItem(self):
         if self.weatherPluginEntryCount != 0:
@@ -163,7 +179,8 @@ class MSNWeatherPlugin(Screen):
             self.setItem()
 
     def setItem(self):
-        self.weatherPluginEntry = config.plugins.WeatherPlugin.Entry[self.weatherPluginEntryIndex - 1]
+        self.weatherPluginEntry = config.plugins.WeatherPlugin.Entry[
+            self.weatherPluginEntryIndex - 1]
         self.clearFields()
         self.startRun()
 
@@ -203,30 +220,41 @@ class MSNWeatherPlugin(Screen):
             for weatherData in list(self.weatherData.weatherItems.items()):
                 item = weatherData[1]
                 if weatherData[0] == "-1":  # current
-                    self["currentTemp"].text = "%s°%s" % (item.temperature, self.weatherData.degreetype)
+                    self["currentTemp"].text = "%s°%s" % (
+                        item.temperature, self.weatherData.degreetype)
                     self["condition"].text = item.skytext
-                    self["humidity"].text = _("Humidity: %s %%") % item.humidity
+                    self["humidity"].text = _(
+                        "Humidity: %s %%") % item.humidity
                     self["wind_condition"].text = item.winddisplay
                     c = time.strptime(item.observationtime, "%H:%M:%S")
-                    self["observationtime"].text = _("Observation time: %s") % time.strftime("%H:%M", c)
-                    self["observationpoint"].text = _("Observation point: %s") % item.observationpoint
-                    self["feelsliketemp"].text = _("Feels like %s") % item.feelslike + "°" + self.weatherData.degreetype
+                    self["observationtime"].text = _(
+                        "Observation time: %s") % time.strftime("%H:%M", c)
+                    self["observationpoint"].text = _(
+                        "Observation point: %s") % item.observationpoint
+                    self["feelsliketemp"].text = _(
+                        "Feels like %s") % item.feelslike + "°" + self.weatherData.degreetype
                 else:
                     index = weatherData[0]
                     c = time.strptime(item.date, "%Y-%m-%d")
-                    self["weekday%s" % index].text = "%s\n%s" % (item.day, time.strftime("%d. %b", c))
+                    self["weekday%s" % index].text = "%s\n%s" % (
+                        item.day, time.strftime("%d. %b", c))
                     lowTemp = item.low
                     highTemp = item.high
-                    self["weekday%s_temp" % index].text = "%s°%s|%s°%s\n%s" % (highTemp, self.weatherData.degreetype, lowTemp, self.weatherData.degreetype, item.skytextday)
+                    self["weekday%s_temp" % index].text = "%s°%s|%s°%s\n%s" % (
+                        highTemp, self.weatherData.degreetype, lowTemp, self.weatherData.degreetype, item.skytextday)
 
         if self.weatherPluginEntryIndex == 1 and WeatherMSNComp is not None:
             WeatherMSNComp.updateWeather(self.weatherData, result, errortext)
 
     def config(self):
-        self.session.openWithCallback(self.setupFinished, MSNWeatherPluginEntriesListConfigScreen)
+        self.session.openWithCallback(
+            self.setupFinished,
+            MSNWeatherPluginEntriesListConfigScreen)
 
     def showsetup(self):
-        self.session.openWithCallback(self.setupFinished, MSNWeatherPluginEntriesListConfigScreen)
+        self.session.openWithCallback(
+            self.setupFinished,
+            MSNWeatherPluginEntriesListConfigScreen)
 
     def setupFinished(self, index, entry=None):
         self.weatherPluginEntryCount = config.plugins.WeatherPlugin.entrycount.value
@@ -252,8 +280,12 @@ class MSNWeatherPlugin(Screen):
         try:
             from Plugins.Extensions.Browser.Browser import Browser
             if self.webSite:
-                self.session.open(Browser, config.plugins.WebBrowser.fullscreen.value, self.webSite, False)
-        except:
+                self.session.open(
+                    Browser,
+                    config.plugins.WebBrowser.fullscreen.value,
+                    self.webSite,
+                    False)
+        except BaseException:
             pass  # I dont care if browser is installed or not...
 
 
@@ -269,14 +301,22 @@ class WeatherIcon(Pixmap):
         sc = AVSwitch().getFramebufferScale()
         self._aspectRatio = eSize(sc[0], sc[1])
         self._scaleSize = self.instance.size()
-        self.picload.setPara((self._scaleSize.width(), self._scaleSize.height(), sc[0], sc[1], True, 2, '#ff000000'))
+        self.picload.setPara(
+            (self._scaleSize.width(),
+             self._scaleSize.height(),
+             sc[0],
+                sc[1],
+                True,
+                2,
+                '#ff000000'))
 
     def paintIconPixmapCB(self, picInfo=None):
         ptr = self.picload.getData()
         if ptr is not None:
             pic_scale_size = eSize()
             # To be added in the future:
-            if 'scale' in eSize.__dict__ and self._scaleSize.isValid() and self._aspectRatio.isValid():
+            if 'scale' in eSize.__dict__ and self._scaleSize.isValid(
+            ) and self._aspectRatio.isValid():
                 pic_scale_size = ptr.size().scale(self._scaleSize, self._aspectRatio)
             # To be removed in the future:
             elif 'scaleSize' in gPixmapPtr.__dict__:

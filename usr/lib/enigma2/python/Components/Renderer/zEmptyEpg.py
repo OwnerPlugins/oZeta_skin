@@ -35,8 +35,9 @@ class zEmptyEpg(VariableText, Renderer):
         self.EmptyText = ""
         self.fillTimer = eTimer()
         try:
-            self.fillTimer_conn = self.fillTimer.timeout.connect(self.__fillText)
-        except:
+            self.fillTimer_conn = self.fillTimer.timeout.connect(
+                self.__fillText)
+        except BaseException:
             self.fillTimer.callback.append(self.__fillText)
         # self.fillTimer.start(50, True)
         self.backText = ""
@@ -65,7 +66,7 @@ class zEmptyEpg(VariableText, Renderer):
         try:
             from Plugins.Extensions.setupGlass17.txt import E_EPG
             self.EmptyText = E_EPG
-        except:
+        except BaseException:
             pass
         return Renderer.applySkin(self, desktop, parent)
 
@@ -100,7 +101,7 @@ class zEmptyEpg(VariableText, Renderer):
                     ena = True
                     try:
                         ena = config.plugins.setupGlass17.par30.value
-                    except:
+                    except BaseException:
                         pass
                     if ena:
                         self.text = "_"

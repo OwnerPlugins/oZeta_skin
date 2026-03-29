@@ -101,7 +101,7 @@ apdb = dict()
 try:
     lng = config.osd.language.value
     lng = lng[:-3]
-except:
+except BaseException:
     lng = 'en'
     pass
 
@@ -130,7 +130,8 @@ autobouquet_file = None
 
 def process_autobouquet():
     global autobouquet_file
-    autobouquet_file = SearchBouquetTerrestrial() or '/etc/enigma2/userbouquet.favourites.tv'
+    autobouquet_file = SearchBouquetTerrestrial(
+    ) or '/etc/enigma2/userbouquet.favourites.tv'
     autobouquet_count = 70
     apdb = {}
 
@@ -184,11 +185,13 @@ class BackdropDB(zBackdropXDownloadThread):
         self.logDB("[QUEUE] : Initialized")
         while True:
             canal = pdb.get()
-            self.logDB("[QUEUE] : {} : {}-{} ({})".format(canal[0], canal[1], canal[2], canal[5]))
+            self.logDB("[QUEUE] : {} : {}-{} ({})".format(canal[0],
+                       canal[1], canal[2], canal[5]))
             self.pstcanal = convtext(canal[5])
 
             if self.pstcanal is not None:
-                dwn_backdrop = os.path.join(path_folder, self.pstcanal + ".jpg")
+                dwn_backdrop = os.path.join(
+                    path_folder, self.pstcanal + ".jpg")
             else:
                 print("None type detected - poster not found")
                 pdb.task_done()  # Per evitare il blocco del thread
@@ -207,20 +210,25 @@ class BackdropDB(zBackdropXDownloadThread):
                     self.logDB(log)
             '''
             if not os.path.exists(dwn_backdrop):
-                val, log = self.search_tmdb(dwn_backdrop, self.pstcanal, canal[4], canal[3])
+                val, log = self.search_tmdb(
+                    dwn_backdrop, self.pstcanal, canal[4], canal[3])
                 self.logDB(log)
             elif not os.path.exists(dwn_backdrop):
-                val, log = self.search_tvdb(dwn_backdrop, self.pstcanal, canal[4], canal[3])
+                val, log = self.search_tvdb(
+                    dwn_backdrop, self.pstcanal, canal[4], canal[3])
                 self.logDB(log)
             elif not os.path.exists(dwn_backdrop):
-                val, log = self.search_fanart(dwn_backdrop, self.pstcanal, canal[4], canal[3])
+                val, log = self.search_fanart(
+                    dwn_backdrop, self.pstcanal, canal[4], canal[3])
                 self.logDB(log)
             elif not os.path.exists(dwn_backdrop):
-                val, log = self.search_imdb(dwn_backdrop, self.pstcanal, canal[4], canal[3])
+                val, log = self.search_imdb(
+                    dwn_backdrop, self.pstcanal, canal[4], canal[3])
 
                 self.logDB(log)
             elif not os.path.exists(dwn_backdrop):
-                val, log = self.search_google(dwn_backdrop, self.pstcanal, canal[4], canal[3], canal[0])
+                val, log = self.search_google(
+                    dwn_backdrop, self.pstcanal, canal[4], canal[3], canal[0])
                 self.logDB(log)
             '''
             search_methods = [
@@ -279,7 +287,8 @@ class BackdropAutoDB(zBackdropXDownloadThread):
             # AUTO ADD NEW FILES - 1440 (24 hours ahead)
             for service in apdb.values():
                 try:
-                    events = epgcache.lookupEvent(['IBDCTESX', (service, 0, -1, 1440)])
+                    events = epgcache.lookupEvent(
+                        ['IBDCTESX', (service, 0, -1, 1440)])
                     '''
                     # if not events:
                         # self.logAutoDB("[AutoDB] No events found for service: {}".format(service))
@@ -288,20 +297,28 @@ class BackdropAutoDB(zBackdropXDownloadThread):
                     newfd = 0
                     newcn = None
                     for evt in events:
-                        self.logAutoDB("[AutoDB] evt {} events ({})".format(evt, len(events)))
+                        self.logAutoDB(
+                            "[AutoDB] evt {} events ({})".format(
+                                evt, len(events)))
                         canal = [None] * 6
                         if PY3:
-                            canal[0] = ServiceReference(service).getServiceName().replace('\xc2\x86', '').replace('\xc2\x87', '')
+                            canal[0] = ServiceReference(service).getServiceName().replace(
+                                '\xc2\x86', '').replace('\xc2\x87', '')
                         else:
-                            canal[0] = ServiceReference(service).getServiceName().replace('\xc2\x86', '').replace('\xc2\x87', '').encode('utf-8')
+                            canal[0] = ServiceReference(service).getServiceName().replace(
+                                '\xc2\x86', '').replace('\xc2\x87', '').encode('utf-8')
                         if evt[1] is None or evt[4] is None or evt[5] is None or evt[6] is None:
-                            self.logAutoDB("[AutoDB] *** Missing EPG for {}".format(canal[0]))
+                            self.logAutoDB(
+                                "[AutoDB] *** Missing EPG for {}".format(canal[0]))
                         else:
-                            canal[1:6] = [evt[1], evt[4], evt[5], evt[6], evt[4]]
-                            self.pstcanal = convtext(canal[5]) if canal[5] else None
+                            canal[1:6] = [evt[1], evt[4],
+                                          evt[5], evt[6], evt[4]]
+                            self.pstcanal = convtext(
+                                canal[5]) if canal[5] else None
 
                             if self.pstcanal is not None:
-                                dwn_backdrop = os.path.join(path_folder, self.pstcanal + ".jpg")
+                                dwn_backdrop = os.path.join(
+                                    path_folder, self.pstcanal + ".jpg")
                             else:
                                 print("None type detected - poster not found")
                                 continue
@@ -311,7 +328,8 @@ class BackdropAutoDB(zBackdropXDownloadThread):
                                 # continue
 
                             if os.path.exists(dwn_backdrop):
-                                os.utime(dwn_backdrop, (time.time(), time.time()))
+                                os.utime(
+                                    dwn_backdrop, (time.time(), time.time()))
                             '''
                             if lng == "fr":
                                 if not os.path.exists(dwn_backdrop):
@@ -324,23 +342,28 @@ class BackdropAutoDB(zBackdropXDownloadThread):
                                         newfd += 1
                             '''
                             if not os.path.exists(dwn_backdrop):
-                                val, log = self.search_tmdb(dwn_backdrop, self.pstcanal, canal[4], canal[3], canal[0])
+                                val, log = self.search_tmdb(
+                                    dwn_backdrop, self.pstcanal, canal[4], canal[3], canal[0])
                                 if val and log.find("SUCCESS"):
                                     newfd += 1
                             elif not os.path.exists(dwn_backdrop):
-                                val, log = self.search_tvdb(dwn_backdrop, self.pstcanal, canal[4], canal[3], canal[0])
+                                val, log = self.search_tvdb(
+                                    dwn_backdrop, self.pstcanal, canal[4], canal[3], canal[0])
                                 if val and log.find("SUCCESS"):
                                     newfd += 1
                             elif not os.path.exists(dwn_backdrop):
-                                val, log = self.search_fanart(dwn_backdrop, self.pstcanal, canal[4], canal[3], canal[0])
+                                val, log = self.search_fanart(
+                                    dwn_backdrop, self.pstcanal, canal[4], canal[3], canal[0])
                                 if val and log.find("SUCCESS"):
                                     newfd += 1
                             elif not os.path.exists(dwn_backdrop):
-                                val, log = self.search_imdb(dwn_backdrop, self.pstcanal, canal[4], canal[3], canal[0])
+                                val, log = self.search_imdb(
+                                    dwn_backdrop, self.pstcanal, canal[4], canal[3], canal[0])
                                 if val and log.find("SUCCESS"):
                                     newfd += 1
                             elif not os.path.exists(dwn_backdrop):
-                                val, log = self.search_google(dwn_backdrop, self.pstcanal, canal[4], canal[3], canal[0])
+                                val, log = self.search_google(
+                                    dwn_backdrop, self.pstcanal, canal[4], canal[3], canal[0])
                                 if val and log.find("SUCCESS"):
                                     newfd += 1
                             '''
@@ -373,7 +396,9 @@ class BackdropAutoDB(zBackdropXDownloadThread):
                             '''
                             newcn = canal[0]
 
-                        self.logAutoDB("[AutoDB] {} new file(s) added ({})".format(newfd, newcn))
+                        self.logAutoDB(
+                            "[AutoDB] {} new file(s) added ({})".format(
+                                newfd, newcn))
                 except Exception as e:
                     self.logAutoDB("[AutoDB] *** Service error: {}".format(e))
                     traceback.print_exc()
@@ -427,7 +452,7 @@ class zBackdropX(Renderer):
         self.timer = eTimer()
         try:
             self.timer_conn = self.timer.timeout.connect(self.showBackdrop)
-        except:
+        except BaseException:
             self.timer.callback.append(self.showBackdrop)
 
     def applySkin(self, desktop, parent):
@@ -469,7 +494,8 @@ class zBackdropX(Renderer):
                 else:
                     self.canal[0] = None
                     self.canal[1] = self.source.event.getBeginTime()
-                    event_name = self.source.event.getEventName().replace('\xc2\x86', '').replace('\xc2\x87', '')
+                    event_name = self.source.event.getEventName().replace(
+                        '\xc2\x86', '').replace('\xc2\x87', '')
                     if not PY3:
                         event_name = event_name.encode('utf-8')
                     self.canal[2] = event_name
@@ -479,8 +505,10 @@ class zBackdropX(Renderer):
                 servicetype = "Event"
             if service is not None:
                 service_str = service.toString()
-                events = epgcache.lookupEvent(['IBDCTESX', (service_str, 0, -1, -1)])
-                service_name = ServiceReference(service).getServiceName().replace('\xc2\x86', '').replace('\xc2\x87', '')
+                events = epgcache.lookupEvent(
+                    ['IBDCTESX', (service_str, 0, -1, -1)])
+                service_name = ServiceReference(service).getServiceName().replace(
+                    '\xc2\x86', '').replace('\xc2\x87', '')
                 if not PY3:
                     service_name = service_name.encode('utf-8')
                 self.canal[0] = service_name
@@ -510,11 +538,17 @@ class zBackdropX(Renderer):
                 return
 
             self.oldCanal = curCanal
-            self.logBackdrop("Service: {} [{}] : {} : {}".format(servicetype, self.nxts, self.canal[0], self.oldCanal))
+            self.logBackdrop(
+                "Service: {} [{}] : {} : {}".format(
+                    servicetype,
+                    self.nxts,
+                    self.canal[0],
+                    self.oldCanal))
 
             self.pstcanal = convtext(self.canal[5])
             if self.pstcanal is not None:
-                self.pstrNm = os.path.join(self.path, str(self.pstcanal) + ".jpg")
+                self.pstrNm = os.path.join(
+                    self.path, str(self.pstcanal) + ".jpg")
                 self.pstcanal = self.pstrNm
 
             if os.path.exists(self.pstcanal):

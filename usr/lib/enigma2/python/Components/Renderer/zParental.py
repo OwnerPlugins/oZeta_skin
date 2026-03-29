@@ -76,9 +76,12 @@ class zParental(Renderer):
             else:
                 try:
                     if PY3:
-                        eventNm = self.event.getEventName().replace('\xc2\x86', '').replace('\xc2\x87', '')
+                        eventNm = self.event.getEventName().replace(
+                            '\xc2\x86', '').replace('\xc2\x87', '')
                     else:
-                        eventNm = self.event.getEventName().replace('\xc2\x86', '').replace('\xc2\x87', '').encode('utf-8')
+                        eventNm = self.event.getEventName().replace(
+                            '\xc2\x86', '').replace(
+                            '\xc2\x87', '').encode('utf-8')
 
                     self.pstcanal = convtext(eventNm) if eventNm else None
                     if not self.pstcanal:
@@ -90,16 +93,36 @@ class zParental(Renderer):
                         with open(infos_file, "r") as f:
                             age = json.load(f).get('Rated', '')
                             cert = {
-                                "TV-G": "0", "G": "0", "TV-Y7": "6", "TV-Y": "6", "TV-10": "10",
-                                "TV-12": "12", "TV-14": "14", "TV-PG": "16", "PG-13": "16", "PG": "16",
-                                "TV-MA": "18", "R": "18", "N/A": "UN", "Not Rated": "UN",
-                                "Unrated": "UN", "": "UN", "Passed": "UN"
-                            }.get(age, "UN")
+                                "TV-G": "0",
+                                "G": "0",
+                                "TV-Y7": "6",
+                                "TV-Y": "6",
+                                "TV-10": "10",
+                                "TV-12": "12",
+                                "TV-14": "14",
+                                "TV-PG": "16",
+                                "PG-13": "16",
+                                "PG": "16",
+                                "TV-MA": "18",
+                                "R": "18",
+                                "N/A": "UN",
+                                "Not Rated": "UN",
+                                "Unrated": "UN",
+                                "": "UN",
+                                "Passed": "UN"}.get(
+                                age,
+                                "UN")
                 except Exception as e:
-                    print("Errore durante la lettura delle informazioni sul rating:", e)
+                    print(
+                        "Errore durante la lettura delle informazioni sul rating:", e)
 
             if cert:
-                self.instance.setPixmap(loadPNG(os.path.join(pratePath, "FSK_%s.png" % cert)))
+                self.instance.setPixmap(
+                    loadPNG(
+                        os.path.join(
+                            pratePath,
+                            "FSK_%s.png" %
+                            cert)))
                 self.instance.show()
             else:
                 self.instance.hide()

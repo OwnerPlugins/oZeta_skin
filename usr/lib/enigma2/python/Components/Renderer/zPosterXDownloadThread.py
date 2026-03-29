@@ -45,7 +45,7 @@ else:
 try:
     from urllib.error import URLError, HTTPError
     from urllib.request import urlopen
-except:
+except BaseException:
     from urllib2 import URLError, HTTPError
     from urllib2 import urlopen
 
@@ -53,7 +53,7 @@ except:
 try:
     lng = config.osd.language.value
     lng = lng[:-3]
-except:
+except BaseException:
     lng = 'en'
     pass
 
@@ -69,8 +69,7 @@ def getRandomUserAgent():
         'Mozilla/5.0 (X11; Linux x86_64; rv:28.0) Gecko/20100101 Firefox/28.0',
         'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_6_8) AppleWebKit/537.13+ (KHTML, like Gecko) Version/5.1.7 Safari/534.57.2',
         'Opera/9.80 (Macintosh; Intel Mac OS X 10.6.8; U; de) Presto/2.9.168 Version/11.52',
-        'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:91.0) Gecko/20100101 Firefox/91.0'
-    ]
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:91.0) Gecko/20100101 Firefox/91.0']
     return random.choice(useragents)
 
 
@@ -186,7 +185,13 @@ class zPosterXDownloadThread(threading.Thread):
                         "éducation", "variété"]
         # self.sizeb = False
 
-    def search_tmdb(self, dwn_poster, title, shortdesc, fulldesc, channel=None):
+    def search_tmdb(
+            self,
+            dwn_poster,
+            title,
+            shortdesc,
+            fulldesc,
+            channel=None):
         try:
             self.dwn_poster = dwn_poster
             print('self.dwn_poster=', self.dwn_poster)
@@ -196,7 +201,8 @@ class zPosterXDownloadThread(threading.Thread):
             self.title_safe = title_safe.replace('+', ' ')
             # Sanitize the filename before saving
             # self.title_safe = sanitize_filename(self.title_safe)
-            url = f"https://api.themoviedb.org/3/search/multi?api_key={tmdb_api}&language={lng}&query={self.title_safe}"
+            url = f"https://api.themoviedb.org/3/search/multi?api_key={tmdb_api}&language={lng}&query={
+                self.title_safe}"
             print('poster search_tmdb url title safe', url)
             data = None
             retries = Retry(total=1, backoff_factor=1)
@@ -205,7 +211,9 @@ class zPosterXDownloadThread(threading.Thread):
             http.mount("http://", adapter)
             http.mount("https://", adapter)
             headers = {'User-Agent': getRandomUserAgent()}
-            response = http.get(url, headers=headers, timeout=(10, 20), verify=False)
+            response = http.get(
+                url, headers=headers, timeout=(
+                    10, 20), verify=False)
             response.raise_for_status()
             if response.status_code == requests.codes.ok:
                 try:
@@ -216,7 +224,8 @@ class zPosterXDownloadThread(threading.Thread):
                 self.downloadData2(data)
                 return True, "Download avviato con successo"
             else:
-                return False, f"Errore durante la ricerca su TMDb: {response.status_code}"
+                return False, f"Errore durante la ricerca su TMDb: {
+                    response.status_code}"
         except Exception as e:
             print('Errore nella ricerca TMDb:', e)
             return False, "Errore durante la ricerca su TMDb"
@@ -230,7 +239,8 @@ class zPosterXDownloadThread(threading.Thread):
             try:
                 # self.sizeb = False
                 for each in data_json['results']:
-                    media_type = str(each['media_type']) if each.get('media_type') else ''
+                    media_type = str(
+                        each['media_type']) if each.get('media_type') else ''
                     if media_type == "tv":
                         media_type = "serie"
                     if media_type in ['serie', 'movie']:
@@ -240,29 +250,34 @@ class zPosterXDownloadThread(threading.Thread):
                         elif media_type == "serie" and 'first_air_date' in each and each['first_air_date']:
                             year = each['first_air_date'].split("-")[0]
                         title = each.get('name', each.get('title', ''))
-                        backdrop = "http://image.tmdb.org/t/p/w1280" + (each.get('backdrop_path') or '')
-                        poster = "http://image.tmdb.org/t/p/w500" + (each.get('poster_path') or '')
+                        backdrop = "http://image.tmdb.org/t/p/w1280" + \
+                            (each.get('backdrop_path') or '')
+                        poster = "http://image.tmdb.org/t/p/w500" + \
+                            (each.get('poster_path') or '')
                         rating = str(each.get('vote_average', 0))
                         show_title = title
                         if year:
                             show_title = "{} ({})".format(title, year)
-                        # Check if poster and backdrop are valid before trying to save
+                        # Check if poster and backdrop are valid before trying
+                        # to save
                         if poster:
-                            callInThread(self.savePoster, poster, self.dwn_poster)
+                            callInThread(
+                                self.savePoster, poster, self.dwn_poster)
                             print('callinThread=Poster')
                             # # self.savePoster(self.dwn_poster, poster)
                             # if self.verifyPoster(self.dwn_poster):
-                                # self.resizePoster(self.dwn_poster)
+                            # self.resizePoster(self.dwn_poster)
                             # if backdrop:
-                                # self.pstrNm = path_folder + '/' + self.title_safe + ".jpg"
-                                # self.dwn_poster = str(self.pstrNm)
-                                # print('callinThread=Backdrop')
-                                # callInThread(self.savePoster, backdrop, self.dwn_poster)
+                            # self.pstrNm = path_folder + '/' + self.title_safe + ".jpg"
+                            # self.dwn_poster = str(self.pstrNm)
+                            # print('callinThread=Backdrop')
+                            # callInThread(self.savePoster, backdrop, self.dwn_poster)
                             # if os.path.exists(self.pstrNm):
-                                # if self.verifyPoster(self.dwn_poster):
-                                    # self.sizeb = True
-                                    # self.resizePoster(self.dwn_poster)
-                            return True, "[SUCCESS poster: tmdb] title {} [poster{}-backdrop{}] => year{} => rating{} => showtitle{}".format(title, poster, backdrop, year, rating, show_title)
+                            # if self.verifyPoster(self.dwn_poster):
+                            # self.sizeb = True
+                            # self.resizePoster(self.dwn_poster)
+                            return True, "[SUCCESS poster: tmdb] title {} [poster{}-backdrop{}] => year{} => rating{} => showtitle{}".format(
+                                title, poster, backdrop, year, rating, show_title)
                     return False, "[SKIP : tmdb] Not found"
             except Exception as e:
                 print('error=', e)
@@ -270,7 +285,13 @@ class zPosterXDownloadThread(threading.Thread):
                     os.remove(self.dwn_poster)
                 return False, "[ERROR : tmdb]"
 
-    def search_tvdb(self, dwn_poster, title, shortdesc, fulldesc, channel=None):
+    def search_tvdb(
+            self,
+            dwn_poster,
+            title,
+            shortdesc,
+            fulldesc,
+            channel=None):
         try:
             self.dwn_poster = dwn_poster
             series_nb = -1
@@ -286,11 +307,14 @@ class zPosterXDownloadThread(threading.Thread):
                 year = year[0]
             else:
                 year = ''
-            url_tvdbg = "https://thetvdb.com/api/GetSeries.php?seriesname={}".format(self.title_safe)
+            url_tvdbg = "https://thetvdb.com/api/GetSeries.php?seriesname={}".format(
+                self.title_safe)
             url_read = requests.get(url_tvdbg).text
             series_id = re.findall(r'<seriesid>(.*?)</seriesid>', url_read)
-            series_name = re.findall(r'<SeriesName>(.*?)</SeriesName>', url_read)
-            series_year = re.findall(r'<FirstAired>(19\d{2}|20\d{2})-\d{2}-\d{2}</FirstAired>', url_read)
+            series_name = re.findall(
+                r'<SeriesName>(.*?)</SeriesName>', url_read)
+            series_year = re.findall(
+                r'<FirstAired>(19\d{2}|20\d{2})-\d{2}-\d{2}</FirstAired>', url_read)
             '''
             # series_banners = re.findall(r'<banner>(.*?)</banner>', url_read)
             # if series_banners:
@@ -313,41 +337,53 @@ class zPosterXDownloadThread(threading.Thread):
                 else:
                     series_name = ''
                 if self.PMATCH(self.title_safe, series_name):
-                    url_tvdb = "https://thetvdb.com/api/{}/series/{}".format(thetvdbkey, series_id[series_nb])
+                    url_tvdb = "https://thetvdb.com/api/{}/series/{}".format(
+                        thetvdbkey, series_id[series_nb])
                     if lng:
                         url_tvdb += "/{}".format(lng)
                     else:
                         url_tvdb += "/en"
                     url_read = requests.get(url_tvdb).text
                     poster = re.findall(r'<poster>(.*?)</poster>', url_read)
-                    url_poster = "https://artworks.thetvdb.com/banners/{}".format(poster[0])
+                    url_poster = "https://artworks.thetvdb.com/banners/{}".format(
+                        poster[0])
                     # backdrop = re.findall(r'<backdrop>(.*?)</backdrop>', url_read)
                     # url_backdrop = "https://artworks.thetvdb.com/banners/{}".format(backdrop[0])
                     if poster is not None and poster[0]:
-                        callInThread(self.savePoster, url_poster, self.dwn_poster)
+                        callInThread(
+                            self.savePoster, url_poster, self.dwn_poster)
                         # # self.savePoster(dwn_poster, url_poster)
                         # if self.verifyPoster(dwn_poster):
-                            # self.resizePoster(dwn_poster)
+                        # self.resizePoster(dwn_poster)
 
                         # if backdrop and backdrop[0]:
-                            # self.pstrNm = path_folder + '/' + self.title_safe + ".jpg"
-                            # dwn_poster = str(self.pstrNm)
-                            # callInThread(self.savePoster, url_backdrop, dwn_poster)
-                            # # # self.savePoster(dwn_poster, url_backdrop)
+                        # self.pstrNm = path_folder + '/' + self.title_safe + ".jpg"
+                        # dwn_poster = str(self.pstrNm)
+                        # callInThread(self.savePoster, url_backdrop, dwn_poster)
+                        # # # self.savePoster(dwn_poster, url_backdrop)
                         # if os.path.exists(self.pstrNm):
-                            # if self.verifyPoster(self.pstrNm):
-                                # self.sizeb = True
-                                # self.resizePoster(self.pstrNm)
-                        return True, "[SUCCESS : tvdb] {} [{}-{}] => {} => {} => {}".format(self.title_safe, chkType, year, url_tvdbg, url_tvdb, url_poster)
+                        # if self.verifyPoster(self.pstrNm):
+                        # self.sizeb = True
+                        # self.resizePoster(self.pstrNm)
+                        return True, "[SUCCESS : tvdb] {} [{}-{}] => {} => {} => {}".format(
+                            self.title_safe, chkType, year, url_tvdbg, url_tvdb, url_poster)
             else:
-                return False, "[SKIP : tvdb] {} [{}-{}] => {} (Not found)".format(self.title_safe, chkType, year, url_tvdbg)
+                return False, "[SKIP : tvdb] {} [{}-{}] => {} (Not found)".format(
+                    self.title_safe, chkType, year, url_tvdbg)
 
         except Exception as e:
             if os.path.exists(dwn_poster):
                 os.remove(dwn_poster)
-            return False, "[ERROR : tvdb] {} => {} ({})".format(title, url_tvdbg, str(e))
+            return False, "[ERROR : tvdb] {} => {} ({})".format(
+                title, url_tvdbg, str(e))
 
-    def search_fanart(self, dwn_poster, title, shortdesc, fulldesc, channel=None):
+    def search_fanart(
+            self,
+            dwn_poster,
+            title,
+            shortdesc,
+            fulldesc,
+            channel=None):
         try:
             self.dwn_poster = dwn_poster
             year = None
@@ -369,12 +405,13 @@ class zPosterXDownloadThread(threading.Thread):
                     year = re.findall(r'19\d{2}|20\d{2}', fd)[1]
                 else:
                     year = re.findall(r'19\d{2}|20\d{2}', fd)[0]
-            except:
+            except BaseException:
                 year = ''
                 pass
 
             try:
-                url_maze = "http://api.tvmaze.com/singlesearch/shows?q={}".format(self.title_safe)
+                url_maze = "http://api.tvmaze.com/singlesearch/shows?q={}".format(
+                    self.title_safe)
                 mj = requests.get(url_maze).json()
                 id = (mj['externals']['thetvdb'])
             except Exception as err:
@@ -382,11 +419,12 @@ class zPosterXDownloadThread(threading.Thread):
 
             try:
                 m_type = 'tv'
-                url_fanart = "https://webservice.fanart.tv/v3/{}/{}?api_key={}".format(m_type, id, fanart_api)
+                url_fanart = "https://webservice.fanart.tv/v3/{}/{}?api_key={}".format(
+                    m_type, id, fanart_api)
                 fjs = requests.get(url_fanart, verify=False, timeout=5).json()
                 try:
                     url = (fjs['tvposter'][0]['url'])
-                except:
+                except BaseException:
                     url = (fjs['movieposter'][0]['url'])
 
                 # try:
@@ -400,30 +438,39 @@ class zPosterXDownloadThread(threading.Thread):
                     callInThread(self.savePoster, url_poster, self.dwn_poster)
                     # # self.savePoster(dwn_poster, url_poster)
                     # if self.verifyPoster(self.dwn_poster):
-                        # self.resizePoster(self.dwn_poster)
+                    # self.resizePoster(self.dwn_poster)
 
                     # url_backdrop = requests.get(url2).json()
                     # # print('url fanart url_poster:', url_poster)
                     # if url_backdrop and url_backdrop != 'null' or url_backdrop is not None or url_backdrop != '':
-                        # self.pstrNm = path_folder + '/' + self.title_safe + ".jpg"
-                        # dwn_poster = str(self.pstrNm)
-                        # callInThread(self.savePoster, url_backdrop, dwn_poster)
-                        # # self.savePoster(dwn_poster, url_poster)
+                    # self.pstrNm = path_folder + '/' + self.title_safe + ".jpg"
+                    # dwn_poster = str(self.pstrNm)
+                    # callInThread(self.savePoster, url_backdrop, dwn_poster)
+                    # # self.savePoster(dwn_poster, url_poster)
                     # if os.path.exists(self.pstrNm):
-                        # if self.verifyPoster(self.pstrNm):
-                            # self.sizeb = True
-                            # self.resizePoster(self.pstrNm)
-                    return True, "[SUCCESS poster: fanart] {} [{}-{}] => {} => {} => {}".format(self.title_safe, chkType, year, url_maze, url_fanart, url_poster)
-                return False, "[SKIP : fanart] {} [{}-{}] => {} (Not found)".format(self.title_safe, chkType, year, url_fanart)
+                    # if self.verifyPoster(self.pstrNm):
+                    # self.sizeb = True
+                    # self.resizePoster(self.pstrNm)
+                    return True, "[SUCCESS poster: fanart] {} [{}-{}] => {} => {} => {}".format(
+                        self.title_safe, chkType, year, url_maze, url_fanart, url_poster)
+                return False, "[SKIP : fanart] {} [{}-{}] => {} (Not found)".format(
+                    self.title_safe, chkType, year, url_fanart)
             except Exception as e:
                 print(e)
 
         except Exception as e:
             if os.path.exists(dwn_poster):
                 os.remove(dwn_poster)
-            return False, "[ERROR : fanart] {} [{}-{}] => {} ({})".format(self.title_safe, chkType, year, url_fanart, str(e))
+            return False, "[ERROR : fanart] {} [{}-{}] => {} ({})".format(
+                self.title_safe, chkType, year, url_fanart, str(e))
 
-    def search_imdb(self, dwn_poster, title, shortdesc, fulldesc, channel=None):
+    def search_imdb(
+            self,
+            dwn_poster,
+            title,
+            shortdesc,
+            fulldesc,
+            channel=None):
         try:
             self.dwn_poster = dwn_poster
             url_poster = None
@@ -455,17 +502,24 @@ class zPosterXDownloadThread(threading.Thread):
             url_imdb = ''
 
             if aka and aka != self.title_safe:
-                url_mimdb = "https://m.imdb.com/find?q={}%20({})".format(self.title_safe, quoteEventName(aka))
+                url_mimdb = "https://m.imdb.com/find?q={}%20({})".format(
+                    self.title_safe, quoteEventName(aka))
             else:
-                url_mimdb = "https://m.imdb.com/find?q={}".format(self.title_safe)
+                url_mimdb = "https://m.imdb.com/find?q={}".format(
+                    self.title_safe)
             url_read = requests.get(url_mimdb).text
-            rc = re.compile(r'<img src="(.*?)".*?<span class="h3">\n(.*?)\n</span>.*?\((\d+)\)(\s\(.*?\))?(.*?)</a>', re.DOTALL)
+            rc = re.compile(
+                r'<img src="(.*?)".*?<span class="h3">\n(.*?)\n</span>.*?\((\d+)\)(\s\(.*?\))?(.*?)</a>',
+                re.DOTALL)
             url_imdb = rc.findall(url_read)
 
             if len(url_imdb) == 0 and aka:
-                url_mimdb = "https://m.imdb.com/find?q={}".format(self.title_safe)
+                url_mimdb = "https://m.imdb.com/find?q={}".format(
+                    self.title_safe)
                 url_read = requests.get(url_mimdb).text
-                rc = re.compile(r'<img src="(.*?)".*?<span class="h3">\n(.*?)\n</span>.*?\((\d+)\)(\s\(.*?\))?(.*?)</a>', re.DOTALL)
+                rc = re.compile(
+                    r'<img src="(.*?)".*?<span class="h3">\n(.*?)\n</span>.*?\((\d+)\)(\s\(.*?\))?(.*?)</a>',
+                    re.DOTALL)
                 url_imdb = rc.findall(url_read)
             len_imdb = len(url_imdb)
             idx_imdb = 0
@@ -485,21 +539,35 @@ class zPosterXDownloadThread(threading.Thread):
                     if imdb[3] == '':
                         if year and year != '':
                             if year == imdb[2]:
-                                url_poster = "{}._V1_UY278,1,185,278_AL_.jpg".format(imdb_poster.group(1))
-                                imsg = "Found title : '{}', aka : '{}', year : '{}'".format(imdb[1], imdb[4], imdb[2])
-                                if self.PMATCH(self.title_safe, imdb[1]) or self.PMATCH(self.title_safe, imdb[4]) or (paka != '' and self.PMATCH(paka, imdb[1])) or (paka != '' and self.PMATCH(paka, imdb[4])):
+                                url_poster = "{}._V1_UY278,1,185,278_AL_.jpg".format(
+                                    imdb_poster.group(1))
+                                imsg = "Found title : '{}', aka : '{}', year : '{}'".format(
+                                    imdb[1], imdb[4], imdb[2])
+                                if self.PMATCH(
+                                    self.title_safe, imdb[1]) or self.PMATCH(
+                                    self.title_safe, imdb[4]) or (
+                                    paka != '' and self.PMATCH(
+                                        paka, imdb[1])) or (
+                                    paka != '' and self.PMATCH(
+                                        paka, imdb[4])):
                                     pfound = True
                                     break
                             elif not url_poster and (int(year) - 1 == int(imdb[2]) or int(year) + 1 == int(imdb[2])):
-                                url_poster = "{}._V1_UY278,1,185,278_AL_.jpg".format(imdb_poster.group(1))
-                                imsg = "Found title : '{}', aka : '{}', year : '+/-{}'".format(imdb[1], imdb[4], imdb[2])
-                                if self.title_safe == imdb[1] or self.title_safe == imdb[4] or (paka != '' and paka == imdb[1]) or (paka != '' and paka == imdb[4]):
+                                url_poster = "{}._V1_UY278,1,185,278_AL_.jpg".format(
+                                    imdb_poster.group(1))
+                                imsg = "Found title : '{}', aka : '{}', year : '+/-{}'".format(
+                                    imdb[1], imdb[4], imdb[2])
+                                if self.title_safe == imdb[1] or self.title_safe == imdb[4] or (
+                                        paka != '' and paka == imdb[1]) or (paka != '' and paka == imdb[4]):
                                     pfound = True
                                     break
                         else:
-                            url_poster = "{}._V1_UY278,1,185,278_AL_.jpg".format(imdb_poster.group(1))
-                            imsg = "Found title : '{}', aka : '{}', year : ''".format(imdb[1], imdb[4])
-                            if self.title_safe == imdb[1] or self.title_safe == imdb[4] or (paka != '' and paka == imdb[1]) or (paka != '' and paka == imdb[4]):
+                            url_poster = "{}._V1_UY278,1,185,278_AL_.jpg".format(
+                                imdb_poster.group(1))
+                            imsg = "Found title : '{}', aka : '{}', year : ''".format(
+                                imdb[1], imdb[4])
+                            if self.title_safe == imdb[1] or self.title_safe == imdb[4] or (
+                                    paka != '' and paka == imdb[1]) or (paka != '' and paka == imdb[4]):
                                 pfound = True
                                 break
                 idx_imdb += 1
@@ -509,33 +577,44 @@ class zPosterXDownloadThread(threading.Thread):
                 if os.path.exists(dwn_poster):
                     # # self.savePoster(dwn_poster, url_poster)
                     # if self.verifyPoster(dwn_poster):
-                        # self.resizePoster(dwn_poster)
+                    # self.resizePoster(dwn_poster)
 
                     # # backdrop
                     # self.pstrNm = path_folder + '/' + self.title_safe + ".jpg"
                     # # dwn_poster = str(self.pstrNm)
                     # callInThread(self.savePoster, url_poster, self.pstrNm)
                     # if os.path.exists(self.pstrNm):
-                        # # self.savePoster(dwn_poster, url_backdrop)
-                        # if self.verifyPoster(self.pstrNm):
-                            # self.sizeb = True
-                            # self.resizePoster(self.pstrNm)
-                    return True, "[SUCCESS url_poster: imdb] {} [{}-{}] => {} [{}/{}] => {} => {}".format(self.title_safe, chkType, year, imsg, idx_imdb, len_imdb, url_mimdb, url_poster)
-            return False, "[SKIP : imdb] {} [{}-{}] => {} (No Entry found [{}])".format(self.title_safe, chkType, year, url_mimdb, len_imdb)
+                    # # self.savePoster(dwn_poster, url_backdrop)
+                    # if self.verifyPoster(self.pstrNm):
+                    # self.sizeb = True
+                    # self.resizePoster(self.pstrNm)
+                    return True, "[SUCCESS url_poster: imdb] {} [{}-{}] => {} [{}/{}] => {} => {}".format(
+                        self.title_safe, chkType, year, imsg, idx_imdb, len_imdb, url_mimdb, url_poster)
+            return False, "[SKIP : imdb] {} [{}-{}] => {} (No Entry found [{}])".format(
+                self.title_safe, chkType, year, url_mimdb, len_imdb)
 
         except Exception as e:
             if os.path.exists(dwn_poster):
                 os.remove(dwn_poster)
-            return False, "[ERROR : imdb] {} [{}-{}] => {} ({})".format(self.title_safe, chkType, year, url_mimdb, str(e))
+            return False, "[ERROR : imdb] {} [{}-{}] => {} ({})".format(
+                self.title_safe, chkType, year, url_mimdb, str(e))
 
-    def search_programmetv_google(self, dwn_poster, title, shortdesc, fulldesc, channel=None):
+    def search_programmetv_google(
+            self,
+            dwn_poster,
+            title,
+            shortdesc,
+            fulldesc,
+            channel=None):
         try:
             self.dwn_poster = dwn_poster
             url_ptv = ''
-            headers = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.97 Safari/537.36"}
+            headers = {
+                "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.97 Safari/537.36"}
             chkType, fd = self.checkType(shortdesc, fulldesc)
             if chkType.startswith("movie"):
-                return False, "[SKIP : programmetv-google] {} [{}] => Skip movie title".format(title, chkType)
+                return False, "[SKIP : programmetv-google] {} [{}] => Skip movie title".format(
+                    title, chkType)
             title_safe = title
             # title_safe = self.UNAC(title)
             # title_safe = quoteEventName(title_safe)
@@ -545,20 +624,29 @@ class zPosterXDownloadThread(threading.Thread):
             url_ptv = "site:programme-tv.net+" + self.title_safe
             if channel and self.title_safe.find(channel.split()[0]) < 0:
                 url_ptv += "+" + quoteEventName(channel)
-            url_ptv = "https://www.google.com/search?q={}&tbm=isch&tbs=ift:jpg%2Cisz:m".format(url_ptv)
-            ff = requests.get(url_ptv, stream=True, headers=headers, cookies={'CONSENT': 'YES+'}).text
+            url_ptv = "https://www.google.com/search?q={}&tbm=isch&tbs=ift:jpg%2Cisz:m".format(
+                url_ptv)
+            ff = requests.get(
+                url_ptv,
+                stream=True,
+                headers=headers,
+                cookies={
+                    'CONSENT': 'YES+'}).text
             if not PY3:
                 ff = ff.encode('utf-8')
             ptv_id = 0
-            plst = re.findall(r'\],\["https://www.programme-tv.net(.*?)",\d+,\d+]', ff)
+            plst = re.findall(
+                r'\],\["https://www.programme-tv.net(.*?)",\d+,\d+]', ff)
             for posterlst in plst:
                 # self.sizeb = False
                 ptv_id += 1
                 url_poster = "https://www.programme-tv.net{}".format(posterlst)
                 url_poster = re.sub(r"\\u003d", "=", url_poster)
-                url_poster_size = re.findall(r'([\d]+)x([\d]+).*?([\w\.-]+).jpg', url_poster)
+                url_poster_size = re.findall(
+                    r'([\d]+)x([\d]+).*?([\w\.-]+).jpg', url_poster)
                 if url_poster_size and url_poster_size[0]:
-                    get_title = self.UNAC(url_poster_size[0][2].replace('-', ''))
+                    get_title = self.UNAC(
+                        url_poster_size[0][2].replace('-', ''))
                     if self.title_safe == get_title:
                         h_ori = float(url_poster_size[0][1])
                         h_tar = float(re.findall(r'(\d+)', isz)[1])
@@ -567,35 +655,53 @@ class zPosterXDownloadThread(threading.Thread):
                         w_tar = w_ori / ratio
                         w_tar = int(w_tar)
                         h_tar = int(h_tar)
-                        url_poster = re.sub(r'/\d+x\d+/', "/" + str(w_tar) + "x" + str(h_tar) + "/", url_poster)
+                        url_poster = re.sub(
+                            r'/\d+x\d+/',
+                            "/" +
+                            str(w_tar) +
+                            "x" +
+                            str(h_tar) +
+                            "/",
+                            url_poster)
                         url_poster = re.sub(r'crop-from/top/', '', url_poster)
-                        callInThread(self.savePoster, url_poster, self.dwn_poster)
+                        callInThread(
+                            self.savePoster, url_poster, self.dwn_poster)
                         # self.savePoster(dwn_poster, url_poster)
                         if os.path.exists(dwn_poster):
                             # if self.verifyPoster(dwn_poster):
-                                # self.resizePoster(dwn_poster)
+                            # self.resizePoster(dwn_poster)
                             # # backdrop
                             # self.pstrNm = path_folder + '/' + self.title_safe + ".jpg"
                             # dwn_poster = str(self.pstrNm)
                             # callInThread(self.savePoster, url_poster, dwn_poster)
                             # # self.savePoster(dwn_poster, url_poster)
                             # if os.path.exists(dwn_poster):
-                                # if self.verifyPoster(dwn_poster):
-                                    # self.sizeb = True
-                                    # self.resizePoster(dwn_poster)
-                            return True, "[SUCCESS url_poster: programmetv-google] {} [{}] => Found self.title_safe : '{}' => {} => {} (initial size: {}) [{}]".format(self.title_safe, chkType, get_title, url_ptv, url_poster, url_poster_size, ptv_id)
-                return False, "[SKIP : programmetv-google] {} [{}] => Not found [{}] => {}".format(self.title_safe, chkType, ptv_id, url_ptv)
+                            # if self.verifyPoster(dwn_poster):
+                            # self.sizeb = True
+                            # self.resizePoster(dwn_poster)
+                            return True, "[SUCCESS url_poster: programmetv-google] {} [{}] => Found self.title_safe : '{}' => {} => {} (initial size: {}) [{}]".format(
+                                self.title_safe, chkType, get_title, url_ptv, url_poster, url_poster_size, ptv_id)
+                return False, "[SKIP : programmetv-google] {} [{}] => Not found [{}] => {}".format(
+                    self.title_safe, chkType, ptv_id, url_ptv)
 
         except Exception as e:
             if os.path.exists(dwn_poster):
                 os.remove(dwn_poster)
-            return False, "[ERROR : programmetv-google] {} [{}] => {} ({})".format(self.title_safe, chkType, url_ptv, str(e))
+            return False, "[ERROR : programmetv-google] {} [{}] => {} ({})".format(
+                self.title_safe, chkType, url_ptv, str(e))
 
-    def search_molotov_google(self, dwn_poster, title, shortdesc, fulldesc, channel=None):
+    def search_molotov_google(
+            self,
+            dwn_poster,
+            title,
+            shortdesc,
+            fulldesc,
+            channel=None):
         try:
             self.dwn_poster = dwn_poster
             url_mgoo = ''
-            headers = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.97 Safari/537.36"}
+            headers = {
+                "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.97 Safari/537.36"}
             chkType, fd = self.checkType(shortdesc, fulldesc)
             title_safe = title
             # title_safe = self.UNAC(title)
@@ -613,11 +719,18 @@ class zPosterXDownloadThread(threading.Thread):
             url_mgoo = "site:molotov.tv+" + self.title_safe
             if channel and self.title_safe.find(channel.split()[0]) < 0:
                 url_mgoo += "+" + quoteEventName(channel)
-            url_mgoo = "https://www.google.com/search?q={}&tbm=isch".format(url_mgoo)
-            ff = requests.get(url_mgoo, stream=True, headers=headers, cookies={'CONSENT': 'YES+'}).text
+            url_mgoo = "https://www.google.com/search?q={}&tbm=isch".format(
+                url_mgoo)
+            ff = requests.get(
+                url_mgoo,
+                stream=True,
+                headers=headers,
+                cookies={
+                    'CONSENT': 'YES+'}).text
             if not PY3:
                 ff = ff.encode('utf-8')
-            plst = re.findall(r'https://www.molotov.tv/(.*?)"(?:.*?)?"(.*?)"', ff)
+            plst = re.findall(
+                r'https://www.molotov.tv/(.*?)"(?:.*?)?"(.*?)"', ff)
             len_plst = len(plst)
             molotov_id = 0
             molotov_table = [0, 0, None, None, 0]
@@ -631,57 +744,77 @@ class zPosterXDownloadThread(threading.Thread):
                     get_title = get_title[0]
                 else:
                     get_title = None
-                get_channel = re.findall(r'(?:streaming|replay)?[ ]+sur[ ]+(.*?)[ ]+molotov.tv', get_name)
+                get_channel = re.findall(
+                    r'(?:streaming|replay)?[ ]+sur[ ]+(.*?)[ ]+molotov.tv', get_name)
                 if get_channel:
                     get_channel = self.UNAC(get_channel[0]).replace(' ', '')
                 else:
-                    get_channel = re.findall(r'regarder[ ]+(.*?)[ ]+en', get_name)
+                    get_channel = re.findall(
+                        r'regarder[ ]+(.*?)[ ]+en', get_name)
                     if get_channel:
-                        get_channel = self.UNAC(get_channel[0]).replace(' ', '')
+                        get_channel = self.UNAC(
+                            get_channel[0]).replace(
+                            ' ', '')
                     else:
                         get_channel = None
                 partialchannel = self.PMATCH(pchannel, get_channel)
                 partialtitle = self.PMATCH(self.title_safe, get_title)
                 if partialtitle > molotov_table[0]:
-                    molotov_table = [partialtitle, partialchannel, get_name, get_path, molotov_id]
+                    molotov_table = [
+                        partialtitle,
+                        partialchannel,
+                        get_name,
+                        get_path,
+                        molotov_id]
                 if partialtitle == 100 and partialchannel == 100:
                     break
                 molotov_id += 1
 
             if molotov_table[0]:
-                ffm = requests.get(molotov_table[3], stream=True, headers=headers).text
+                ffm = requests.get(
+                    molotov_table[3],
+                    stream=True,
+                    headers=headers).text
                 if not PY3:
                     ffm = ffm.encode('utf-8')
-                pltt = re.findall(r'"https://fusion.molotov.tv/(.*?)/jpg" alt="(.*?)"', ffm)
+                pltt = re.findall(
+                    r'"https://fusion.molotov.tv/(.*?)/jpg" alt="(.*?)"', ffm)
                 if len(pltt) > 0:
                     pltc = self.UNAC(pltt[0][1])
                     plst = "https://fusion.molotov.tv/" + pltt[0][0] + "/jpg"
-                    imsg = "Found title ({}%) & channel ({}%) : '{}' + '{}' [{}/{}]".format(molotov_table[0], molotov_table[1], molotov_table[2], pltc, molotov_table[4], len_plst)
+                    imsg = "Found title ({}%) & channel ({}%) : '{}' + '{}' [{}/{}]".format(
+                        molotov_table[0], molotov_table[1], molotov_table[2], pltc, molotov_table[4], len_plst)
             else:
-                plst = re.findall(r'\],\["https://(.*?)",\d+,\d+].*?"https://.*?","(.*?)"', ff)
+                plst = re.findall(
+                    r'\],\["https://(.*?)",\d+,\d+].*?"https://.*?","(.*?)"', ff)
                 len_plst = len(plst)
                 if len_plst > 0:
                     for pl in plst:
                         if pl[1].startswith("Regarder"):
                             pltc = self.UNAC(pl[1])
                             partialtitle = self.PMATCH(self.title_safe, pltc)
-                            get_channel = re.findall(r'regarder[ ]+(.*?)[ ]+en', pltc)
+                            get_channel = re.findall(
+                                r'regarder[ ]+(.*?)[ ]+en', pltc)
                             if get_channel:
-                                get_channel = self.UNAC(get_channel[0]).replace(' ', '')
+                                get_channel = self.UNAC(
+                                    get_channel[0]).replace(' ', '')
                             else:
                                 get_channel = None
                             partialchannel = self.PMATCH(pchannel, get_channel)
                             if partialchannel > 0 and partialtitle < 50:
                                 partialtitle = 50
                             plst = "https://" + pl[0]
-                            molotov_table = [partialtitle, partialchannel, pltc, plst, -1]
-                            imsg = "Fallback title ({}%) & channel ({}%) : '{}' [{}/{}]".format(molotov_table[0], molotov_table[1], pltc, -1, len_plst)
+                            molotov_table = [
+                                partialtitle, partialchannel, pltc, plst, -1]
+                            imsg = "Fallback title ({}%) & channel ({}%) : '{}' [{}/{}]".format(
+                                molotov_table[0], molotov_table[1], pltc, -1, len_plst)
                             break
 
             if molotov_table[0] == 100 and molotov_table[1] == 100:
                 poster = plst
             elif chkType.startswith("movie"):
-                imsg = "Skip movie type '{}' [{}%-{}%-{}]".format(pltc, molotov_table[0], molotov_table[1], len_plst)
+                imsg = "Skip movie type '{}' [{}%-{}%-{}]".format(
+                    pltc, molotov_table[0], molotov_table[1], len_plst)
             elif molotov_table[0] == 100:
                 poster = plst
             elif molotov_table[0] >= 50 and molotov_table[1]:
@@ -689,21 +822,31 @@ class zPosterXDownloadThread(threading.Thread):
             elif molotov_table[0] >= 75:
                 poster = plst
             elif chkType == '':
-                imsg = "Skip unknown type '{}' [{}%-{}%-{}]".format(pltc, molotov_table[0], molotov_table[1], len_plst)
+                imsg = "Skip unknown type '{}' [{}%-{}%-{}]".format(
+                    pltc, molotov_table[0], molotov_table[1], len_plst)
             elif molotov_table[0] >= 25 and molotov_table[1]:
                 poster = plst
             elif molotov_table[0] >= 50:
                 poster = plst
             else:
-                imsg = "Not found '{}' [{}%-{}%-{}]".format(pltc, molotov_table[0], molotov_table[1], len_plst)
+                imsg = "Not found '{}' [{}%-{}%-{}]".format(
+                    pltc, molotov_table[0], molotov_table[1], len_plst)
             if poster:
                 # self.sizeb = False
-                url_poster = re.sub(r'/\d+x\d+/', "/" + re.sub(r', ', 'x', isz) + "/", poster)
+                url_poster = re.sub(
+                    r'/\d+x\d+/',
+                    "/" +
+                    re.sub(
+                        r', ',
+                        'x',
+                        isz) +
+                    "/",
+                    poster)
                 callInThread(self.savePoster, poster, dwn_poster)
                 # self.savePoster(dwn_poster, url_poster)
                 if os.path.exists(dwn_poster):
                     # if self.verifyPoster(dwn_poster):
-                        # self.resizePoster(dwn_poster)
+                    # self.resizePoster(dwn_poster)
                     # # backdrop
                     # self.pstrNm = path_folder + '/' + self.title_safe + ".jpg"
                     # dwn_poster = str(self.pstrNm)
@@ -711,20 +854,30 @@ class zPosterXDownloadThread(threading.Thread):
                     # callInThread(self.savePoster, poster, dwn_poster)
                     # # self.savePoster(dwn_poster, url_poster)
                     # if os.path.exists(dwn_poster):
-                        # if self.verifyPoster(dwn_poster):
-                            # self.sizeb = True
-                            # self.resizePoster(dwn_poster)
-                    return True, "[SUCCESS url_poster: molotov-google] {} ({}) [{}] => {} => {} => {}".format(self.title_safe, channel, chkType, imsg, url_mgoo, url_poster)
-                return False, "[SKIP : molotov-google] {} ({}) [{}] => {} => {} => {} (jpeg error)".format(self.title_safe, channel, chkType, imsg, url_mgoo, url_poster)
+                    # if self.verifyPoster(dwn_poster):
+                    # self.sizeb = True
+                    # self.resizePoster(dwn_poster)
+                    return True, "[SUCCESS url_poster: molotov-google] {} ({}) [{}] => {} => {} => {}".format(
+                        self.title_safe, channel, chkType, imsg, url_mgoo, url_poster)
+                return False, "[SKIP : molotov-google] {} ({}) [{}] => {} => {} => {} (jpeg error)".format(
+                    self.title_safe, channel, chkType, imsg, url_mgoo, url_poster)
         except Exception as e:
             if os.path.exists(dwn_poster):
                 os.remove(dwn_poster)
-            return False, "[ERROR : molotov-google] {} [{}] => {} ({})".format(self.title_safe, chkType, url_mgoo, str(e))
+            return False, "[ERROR : molotov-google] {} [{}] => {} ({})".format(
+                self.title_safe, chkType, url_mgoo, str(e))
 
-    def search_google(self, dwn_poster, title, shortdesc, fulldesc, channel=None):
+    def search_google(
+            self,
+            dwn_poster,
+            title,
+            shortdesc,
+            fulldesc,
+            channel=None):
         try:
             self.dwn_poster = dwn_poster
-            headers = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.97 Safari/537.36"}
+            headers = {
+                "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.97 Safari/537.36"}
             chkType, fd = self.checkType(shortdesc, fulldesc)
             poster = None
             url_poster = ''
@@ -752,14 +905,22 @@ class zPosterXDownloadThread(threading.Thread):
                 url_google += "+{}".format(srch)
             if year:
                 url_google += "+{}".format(year)
-            url_google = "https://www.google.com/search?q={}&tbm=isch&tbs=sbd:0".format(url_google)
-            ff = requests.get(url_google, stream=True, headers=headers, cookies={'CONSENT': 'YES+'}).text
+            url_google = "https://www.google.com/search?q={}&tbm=isch&tbs=sbd:0".format(
+                url_google)
+            ff = requests.get(
+                url_google,
+                stream=True,
+                headers=headers,
+                cookies={
+                    'CONSENT': 'YES+'}).text
 
             posterlst = re.findall(r'\],\["https://(.*?)",\d+,\d+]', ff)
             if len(posterlst) == 0:
                 url_google = self.title_safe
-                url_google = "https://www.google.com/search?q={}&tbm=isch&tbs=ift:jpg%2Cisz:m".format(url_google)
-                ff = requests.get(url_google, stream=True, headers=headers).text
+                url_google = "https://www.google.com/search?q={}&tbm=isch&tbs=ift:jpg%2Cisz:m".format(
+                    url_google)
+                ff = requests.get(
+                    url_google, stream=True, headers=headers).text
                 posterlst = re.findall(r'\],\["https://(.*?)",\d+,\d+]', ff)
 
             for pl in posterlst:
@@ -770,7 +931,7 @@ class zPosterXDownloadThread(threading.Thread):
                 # self.savePoster(dwn_poster, url_poster)
                 if os.path.exists(dwn_poster):
                     # if self.verifyPoster(dwn_poster):
-                        # self.resizePoster(dwn_poster)
+                    # self.resizePoster(dwn_poster)
                     poster = pl
                     break
                 # # backdrop
@@ -784,22 +945,26 @@ class zPosterXDownloadThread(threading.Thread):
                     # self.sizeb = True
                     # self.resizePoster(self.pstrNm)
             if poster is not None:
-                return True, "[SUCCESS poster: google] {} [{}-{}] => {} => {}".format(self.title_safe, chkType, year, url_google, url_poster)
-            return False, "[SKIP : google] {} [{}-{}] => {} => {} (Not found)".format(self.title_safe, chkType, year, url_google, url_poster)
+                return True, "[SUCCESS poster: google] {} [{}-{}] => {} => {}".format(
+                    self.title_safe, chkType, year, url_google, url_poster)
+            return False, "[SKIP : google] {} [{}-{}] => {} => {} (Not found)".format(
+                self.title_safe, chkType, year, url_google, url_poster)
         except Exception as e:
             if os.path.exists(dwn_poster):
                 os.remove(dwn_poster)
-            return False, "[ERROR : google] {} [{}-{}] => {} => {} ({})".format(self.title_safe, chkType, year, url_google, url_poster, str(e))
+            return False, "[ERROR : google] {} [{}-{}] => {} => {} ({})".format(
+                self.title_safe, chkType, year, url_google, url_poster, str(e))
 
     def savePoster(self, url, callback):
         print('000000000URLLLLL=', url)
         print('000000000CALLBACK=', callback)
-        AGENTS = ["Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.82 Safari/537.36",
-                  "Mozilla/5.0 (iPhone; CPU iPhone OS 14_4_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0.3 Mobile/15E148 Safari/604.1",
-                  "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/110.0",
-                  "Mozilla/4.0 (compatible; MSIE 9.0; Windows NT 6.1)",
-                  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.141 Safari/537.36 Edge/87.0.664.75",
-                  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.102 Safari/537.36 Edge/18.18363"]
+        AGENTS = [
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.82 Safari/537.36",
+            "Mozilla/5.0 (iPhone; CPU iPhone OS 14_4_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0.3 Mobile/15E148 Safari/604.1",
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/110.0",
+            "Mozilla/4.0 (compatible; MSIE 9.0; Windows NT 6.1)",
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.141 Safari/537.36 Edge/87.0.664.75",
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.102 Safari/537.36 Edge/18.18363"]
         headers = {"User-Agent": choice(AGENTS)}
         try:
             response = get(url.encode(), headers=headers, timeout=(3.05, 6))
@@ -816,20 +981,20 @@ class zPosterXDownloadThread(threading.Thread):
         try:
             print('resizePoster poster==============')
             # if self.sizeb:
-                # self.sizeb = False
-                # print('resizePoster backdrop==============')
-                # img = Image.open(dwn_poster)
-                # width, height = img.size
-                # ratio = float(width) // float(height)
-                # new_height = int(bisz.split(",")[1])
-                # new_width = int(ratio * new_height)
-                # try:
-                    # rimg = img.resize((new_width, new_height), Image.LANCZOS)
-                # except:
-                    # rimg = img.resize((new_width, new_height), Image.ANTIALIAS)
-                # img.close()
-                # rimg.save(dwn_poster)
-                # rimg.close()
+            # self.sizeb = False
+            # print('resizePoster backdrop==============')
+            # img = Image.open(dwn_poster)
+            # width, height = img.size
+            # ratio = float(width) // float(height)
+            # new_height = int(bisz.split(",")[1])
+            # new_width = int(ratio * new_height)
+            # try:
+            # rimg = img.resize((new_width, new_height), Image.LANCZOS)
+            # except:
+            # rimg = img.resize((new_width, new_height), Image.ANTIALIAS)
+            # img.close()
+            # rimg.save(dwn_poster)
+            # rimg.close()
             img = Image.open(dwn_poster)
             width, height = img.size
             ratio = float(width) // float(height)
@@ -837,7 +1002,7 @@ class zPosterXDownloadThread(threading.Thread):
             new_width = int(ratio * new_height)
             try:
                 rimg = img.resize((new_width, new_height), Image.LANCZOS)
-            except:
+            except BaseException:
                 rimg = img.resize((new_width, new_height), Image.ANTIALIAS)
             img.close()
             rimg.save(dwn_poster)
@@ -854,14 +1019,14 @@ class zPosterXDownloadThread(threading.Thread):
             else:
                 try:
                     os.remove(dwn_poster)
-                except:
+                except BaseException:
                     pass
                 return False
         except Exception as e:
             print(e)
             try:
                 os.remove(dwn_poster)
-            except:
+            except BaseException:
                 pass
             return False
         return True

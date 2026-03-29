@@ -53,7 +53,15 @@ class zEventListDisplay(Renderer):
             while i < 3:
                 if str(i) in self.columns:
                     value = self.columns[str(i)]
-                    self.instance.writeText(eRect(value[0], y + int((self.rowHeight-value[4])/2), value[1], self.rowHeight), value[2], self.backgroundColor, value[3], item[value[5]], value[6])
+                    self.instance.writeText(eRect(value[0],
+                                                  y + int((self.rowHeight - value[4]) / 2),
+                                                  value[1],
+                                                  self.rowHeight),
+                                            value[2],
+                                            self.backgroundColor,
+                                            value[3],
+                                            item[value[5]],
+                                            value[6])
                 i += 1
             a += 1
             y += self.rowHeight
@@ -72,8 +80,18 @@ class zEventListDisplay(Renderer):
             return eSize(int(x), int(y))
 
         def parseColumnValue(value):
-            x, length, color, fontname, fontheight, align, itemindex = value.split(',')
-            return (int(x), int(length), parseColor(color), gFont(fontname, int(fontheight)), int(fontheight), int(itemindex), int(align))
+            x, length, color, fontname, fontheight, align, itemindex = value.split(
+                ',')
+            return (
+                int(x),
+                int(length),
+                parseColor(color),
+                gFont(
+                    fontname,
+                    int(fontheight)),
+                int(fontheight),
+                int(itemindex),
+                int(align))
 
         for (attrib, value) in self.skinAttributes:
             if attrib == "size":

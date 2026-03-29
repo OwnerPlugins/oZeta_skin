@@ -650,7 +650,8 @@ def __getGenreStringSubIceTV(hn, ln, genres):
 
 countries = {
     "AUS": (__getGenreStringMain, __getGenreStringMain, GenresAUS()),
-    # Use illegal country names for IceTV genre tables so that they won't match real countries
+    # Use illegal country names for IceTV genre tables so that they won't
+    # match real countries
     "AUSIceTV": (__getGenreStringMainIceTV, __getGenreStringSubIceTV, GenresAUSIceTV()),
     "DEUIceTV": (__getGenreStringMainIceTV, __getGenreStringSubIceTV, GenresDEUIceTV()),
 }
@@ -665,7 +666,9 @@ subtype = defaultGenre.subtype
 
 
 def __remapCountry(country):
-    if hasattr(config.plugins, "icetv") and config.plugins.icetv.enable_epg.value:
+    if hasattr(
+            config.plugins,
+            "icetv") and config.plugins.icetv.enable_epg.value:
         if not country:
             country = config.plugins.icetv.member.country.value
         iceTVCountry = country + "IceTV"
@@ -687,7 +690,8 @@ def getGenreStringSub(hn, ln, country=None):
 def getGenreStringLong(hn, ln, country=None):
     # if hn == 0:
     #   return _("Undefined content") + " " + str(ln)
-    if hn == 15 and not (hasattr(config.plugins, "icetv") and config.plugins.icetv.enable_epg.value):
+    if hn == 15 and not (hasattr(config.plugins, "icetv")
+                         and config.plugins.icetv.enable_epg.value):
         return _("User defined") + " " + str(ln)
     main = getGenreStringMain(hn, ln, country=country)
     sub = getGenreStringSub(hn, ln, country=country)

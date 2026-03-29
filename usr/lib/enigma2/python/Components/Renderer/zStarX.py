@@ -42,7 +42,7 @@ else:
 try:
     lng = config.osd.language.value
     lng = lng[:-3]
-except:
+except BaseException:
     lng = 'en'
     pass
 print('language: ', lng)
@@ -151,9 +151,11 @@ class zStarX(VariableValue, Renderer):
             if not self.event:
                 return
             if PY3:
-                self.evntNm = self.event.getEventName().replace('\xc2\x86', '').replace('\xc2\x87', '')
+                self.evntNm = self.event.getEventName().replace(
+                    '\xc2\x86', '').replace('\xc2\x87', '')
             else:
-                self.evntNm = self.event.getEventName().replace('\xc2\x86', '').replace('\xc2\x87', '').encode('utf-8')
+                self.evntNm = self.event.getEventName().replace(
+                    '\xc2\x86', '').replace('\xc2\x87', '').encode('utf-8')
             self.pstcanal = convtext(self.evntNm) if self.evntNm else None
             if not self.pstcanal:
                 print('Evento non trovato per la visualizzazione del poster')
@@ -170,7 +172,8 @@ class zStarX(VariableValue, Renderer):
     def download_and_save_info(self, dwn_infos):
 
         try:
-            url = "http://api.themoviedb.org/3/search/multi?api_key=%s&query=%s" % (tmdb_api, quoteEventName(self.evntNm))
+            url = "http://api.themoviedb.org/3/search/multi?api_key=%s&query=%s" % (
+                tmdb_api, quoteEventName(self.evntNm))
             url_data = json.load(urlopen(url))
             if url_data.get('results'):
                 movie_id = url_data['results'][0]['id']
@@ -180,7 +183,8 @@ class zStarX(VariableValue, Renderer):
             print("Download Exception: ", e)
 
     def fetch_movie_data(self, movie_id):
-        movie_url = "https://api.themoviedb.org/3/movie/%s?api_key=%s&append_to_response=credits&language=%s" % (movie_id, tmdb_api, lng)
+        movie_url = "https://api.themoviedb.org/3/movie/%s?api_key=%s&append_to_response=credits&language=%s" % (
+            movie_id, tmdb_api, lng)
         return json.load(urlopen(movie_url))
 
     def load_info_from_file(self, filepath):

@@ -86,10 +86,14 @@ class MSNWeather:
         path = "/etc/enigma2/weather_icons/"
         extension = self.checkIconExtension(path)
         if extension is None:
-            path = os_path.dirname(resolveFilename(SCOPE_SKIN, config.skin.primary_skin.value)) + "/weather_icons/"
+            path = os_path.dirname(
+                resolveFilename(
+                    SCOPE_SKIN,
+                    config.skin.primary_skin.value)) + "/weather_icons/"
             extension = self.checkIconExtension(path)
         if extension is None:
-            path = eEnv.resolve("${libdir}/enigma2/python/Plugins/Extensions/WeatherPlugin/icons/")
+            path = eEnv.resolve(
+                "${libdir}/enigma2/python/Plugins/Extensions/WeatherPlugin/icons/")
             extension = ".gif"
         self.setIconPath(path)
         self.setIconExtension(extension)
@@ -101,12 +105,12 @@ class MSNWeather:
         if os_path.exists(path):
             try:
                 filename = os_listdir(path)[0]
-            except:
+            except BaseException:
                 filename = None
         if filename is not None:
             try:
                 extension = os_path.splitext(filename)[1].lower()
-            except:
+            except BaseException:
                 pass
         return extension
 
@@ -132,7 +136,14 @@ class MSNWeather:
     def setIconExtension(self, iconextension):
         self.iconextension = iconextension
 
-    def getWeatherData(self, degreetype, locationcode, city, callback, callbackShowIcon, callbackAllIconsDownloaded=None):
+    def getWeatherData(
+            self,
+            degreetype,
+            locationcode,
+            city,
+            callback,
+            callbackShowIcon,
+            callbackAllIconsDownloaded=None):
         self.initialize()
         language = config.osd.language.value.replace("_", "-")
         if language == "en-EN":  # hack
@@ -143,16 +154,26 @@ class MSNWeather:
         self.callback = callback
         self.callbackShowIcon = callbackShowIcon
         self.callbackAllIconsDownloaded = callbackAllIconsDownloaded
-        url = "http://weather.service.msn.com/data.aspx?src=outlook&weadegreetype=%s&culture=%s&wealocations=%s" % (degreetype, language, urllib_quote(locationcode))
+        url = "http://weather.service.msn.com/data.aspx?src=outlook&weadegreetype=%s&culture=%s&wealocations=%s" % (
+            degreetype, language, urllib_quote(locationcode))
         url = six.ensure_binary(url)
         getPage(url).addCallback(self.xmlCallback).addErrback(self.error)
 
-    def getDefaultWeatherData(self, callback=None, callbackAllIconsDownloaded=None):
+    def getDefaultWeatherData(
+            self,
+            callback=None,
+            callbackAllIconsDownloaded=None):
         self.initialize()
         weatherPluginEntryCount = config.plugins.WeatherPlugin.entrycount.value
         if weatherPluginEntryCount >= 1:
             weatherPluginEntry = config.plugins.WeatherPlugin.Entry[0]
-            self.getWeatherData(weatherPluginEntry.degreetype.value, weatherPluginEntry.weatherlocationcode.value, weatherPluginEntry.city.value, callback, None, callbackAllIconsDownloaded)
+            self.getWeatherData(
+                weatherPluginEntry.degreetype.value,
+                weatherPluginEntry.weatherlocationcode.value,
+                weatherPluginEntry.city.value,
+                callback,
+                None,
+                callbackAllIconsDownloaded)
             return 1
         else:
             return 0
@@ -199,44 +220,67 @@ class MSNWeather:
                         if PY3:
                             self.callback(self.ERROR, errormessage)
                         else:
-                            self.callback(self.ERROR, errormessage.encode("utf-8", 'ignore'))
+                            self.callback(
+                                self.ERROR, errormessage.encode(
+                                    "utf-8", 'ignore'))
                     break
                 if PY3:
                     self.degreetype = childs.attrib.get("degreetype")
-                    self.imagerelativeurl = "%slaw/" % childs.attrib.get("imagerelativeurl")
+                    self.imagerelativeurl = "%slaw/" % childs.attrib.get(
+                        "imagerelativeurl")
                     self.url = childs.attrib.get("url")
                 else:
-                    self.degreetype = childs.attrib.get("degreetype").encode("utf-8", 'ignore')
-                    self.imagerelativeurl = "%slaw/" % childs.attrib.get("imagerelativeurl").encode("utf-8", 'ignore')
-                    self.url = childs.attrib.get("url").encode("utf-8", 'ignore')
+                    self.degreetype = childs.attrib.get(
+                        "degreetype").encode("utf-8", 'ignore')
+                    self.imagerelativeurl = "%slaw/" % childs.attrib.get(
+                        "imagerelativeurl").encode("utf-8", 'ignore')
+                    self.url = childs.attrib.get(
+                        "url").encode("utf-8", 'ignore')
             for items in childs:
                 if items.tag == "current":
                     currentWeather = MSNWeatherItem()
                     if PY3:
-                        currentWeather.temperature = items.attrib.get("temperature")
+                        currentWeather.temperature = items.attrib.get(
+                            "temperature")
                         currentWeather.skytext = items.attrib.get("skytext")
                         currentWeather.humidity = items.attrib.get("humidity")
-                        currentWeather.winddisplay = items.attrib.get("winddisplay")
-                        currentWeather.observationtime = items.attrib.get("observationtime")
-                        currentWeather.observationpoint = items.attrib.get("observationpoint")
-                        currentWeather.feelslike = items.attrib.get("feelslike")
-                        currentWeather.skycode = "%s%s" % (items.attrib.get("skycode"), self.iconextension)
+                        currentWeather.winddisplay = items.attrib.get(
+                            "winddisplay")
+                        currentWeather.observationtime = items.attrib.get(
+                            "observationtime")
+                        currentWeather.observationpoint = items.attrib.get(
+                            "observationpoint")
+                        currentWeather.feelslike = items.attrib.get(
+                            "feelslike")
+                        currentWeather.skycode = "%s%s" % (
+                            items.attrib.get("skycode"), self.iconextension)
                         currentWeather.code = items.attrib.get("skycode")
                     else:
-                        currentWeather.temperature = items.attrib.get("temperature").encode("utf-8", 'ignore')
-                        currentWeather.skytext = items.attrib.get("skytext").encode("utf-8", 'ignore')
-                        currentWeather.humidity = items.attrib.get("humidity").encode("utf-8", 'ignore')
-                        currentWeather.winddisplay = items.attrib.get("winddisplay").encode("utf-8", 'ignore')
-                        currentWeather.observationtime = items.attrib.get("observationtime").encode("utf-8", 'ignore')
-                        currentWeather.observationpoint = items.attrib.get("observationpoint").encode("utf-8", 'ignore')
-                        currentWeather.feelslike = items.attrib.get("feelslike").encode("utf-8", 'ignore')
-                        currentWeather.skycode = "%s%s" % (items.attrib.get("skycode").encode("utf-8", 'ignore'), self.iconextension)
-                        currentWeather.code = items.attrib.get("skycode").encode("utf-8", 'ignore')
+                        currentWeather.temperature = items.attrib.get(
+                            "temperature").encode("utf-8", 'ignore')
+                        currentWeather.skytext = items.attrib.get(
+                            "skytext").encode("utf-8", 'ignore')
+                        currentWeather.humidity = items.attrib.get(
+                            "humidity").encode("utf-8", 'ignore')
+                        currentWeather.winddisplay = items.attrib.get(
+                            "winddisplay").encode("utf-8", 'ignore')
+                        currentWeather.observationtime = items.attrib.get(
+                            "observationtime").encode("utf-8", 'ignore')
+                        currentWeather.observationpoint = items.attrib.get(
+                            "observationpoint").encode("utf-8", 'ignore')
+                        currentWeather.feelslike = items.attrib.get(
+                            "feelslike").encode("utf-8", 'ignore')
+                        currentWeather.skycode = "%s%s" % (items.attrib.get(
+                            "skycode").encode("utf-8", 'ignore'), self.iconextension)
+                        currentWeather.code = items.attrib.get(
+                            "skycode").encode("utf-8", 'ignore')
                     filename = "%s%s" % (self.iconpath, currentWeather.skycode)
                     currentWeather.iconFilename = filename
                     if not os_path.exists(filename):
-                        url = "%s%s" % (self.imagerelativeurl, currentWeather.skycode)
-                        IconDownloadList.append(WeatherIconItem(url=url, filename=filename, index=-1))
+                        url = "%s%s" % (self.imagerelativeurl,
+                                        currentWeather.skycode)
+                        IconDownloadList.append(WeatherIconItem(
+                            url=url, filename=filename, index=-1))
                     else:
                         self.showIcon(-1, filename)
                     self.weatherItems[str(-1)] = currentWeather
@@ -250,30 +294,49 @@ class MSNWeather:
                         weather.low = items.attrib.get("low")
                         weather.high = items.attrib.get("high")
                         weather.skytextday = items.attrib.get("skytextday")
-                        weather.skycodeday = "%s%s" % (items.attrib.get("skycodeday"), self.iconextension)
+                        weather.skycodeday = "%s%s" % (
+                            items.attrib.get("skycodeday"), self.iconextension)
                         weather.code = items.attrib.get("skycodeday")
                     else:
-                        weather.date = items.attrib.get("date").encode("utf-8", 'ignore')
-                        weather.day = items.attrib.get("day").encode("utf-8", 'ignore')
-                        weather.shortday = items.attrib.get("shortday").encode("utf-8", 'ignore')
-                        weather.low = items.attrib.get("low").encode("utf-8", 'ignore')
-                        weather.high = items.attrib.get("high").encode("utf-8", 'ignore')
-                        weather.skytextday = items.attrib.get("skytextday").encode("utf-8", 'ignore')
-                        weather.skycodeday = "%s%s" % (items.attrib.get("skycodeday").encode("utf-8", 'ignore'), self.iconextension)
-                        weather.code = items.attrib.get("skycodeday").encode("utf-8", 'ignore')
+                        weather.date = items.attrib.get(
+                            "date").encode("utf-8", 'ignore')
+                        weather.day = items.attrib.get(
+                            "day").encode("utf-8", 'ignore')
+                        weather.shortday = items.attrib.get(
+                            "shortday").encode("utf-8", 'ignore')
+                        weather.low = items.attrib.get(
+                            "low").encode("utf-8", 'ignore')
+                        weather.high = items.attrib.get(
+                            "high").encode("utf-8", 'ignore')
+                        weather.skytextday = items.attrib.get(
+                            "skytextday").encode("utf-8", 'ignore')
+                        weather.skycodeday = "%s%s" % (items.attrib.get(
+                            "skycodeday").encode("utf-8", 'ignore'), self.iconextension)
+                        weather.code = items.attrib.get(
+                            "skycodeday").encode("utf-8", 'ignore')
                     filename = "%s%s" % (self.iconpath, weather.skycodeday)
                     weather.iconFilename = filename
                     if not os_path.exists(filename):
-                        url = "%s%s" % (self.imagerelativeurl, weather.skycodeday)
-                        IconDownloadList.append(WeatherIconItem(url=url, filename=filename, index=index))
+                        url = "%s%s" % (self.imagerelativeurl,
+                                        weather.skycodeday)
+                        IconDownloadList.append(WeatherIconItem(
+                            url=url, filename=filename, index=index))
                     else:
                         self.showIcon(index, filename)
                     self.weatherItems[str(index)] = weather
 
         if len(IconDownloadList) != 0:
             ds = defer.DeferredSemaphore(tokens=len(IconDownloadList))
-            downloads = [ds.run(download, item).addErrback(self.errorIconDownload, item).addCallback(self.finishedIconDownload, item) for item in IconDownloadList]
-            finished = defer.DeferredList(downloads).addErrback(self.error).addCallback(self.finishedAllDownloadFiles)
+            downloads = [
+                ds.run(
+                    download,
+                    item).addErrback(
+                    self.errorIconDownload,
+                    item).addCallback(
+                    self.finishedIconDownload,
+                    item) for item in IconDownloadList]
+            finished = defer.DeferredList(downloads).addErrback(
+                self.error).addCallback(self.finishedAllDownloadFiles)
         else:
             self.finishedAllDownloadFiles(None)
 

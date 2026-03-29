@@ -25,7 +25,8 @@ from os import remove
 colorend = '\033[m'
 colorstart = '\033[31m'
 PY3 = sys.version_info.major >= 3
-pythonFull = float(str(sys.version_info.major) + "." + str(sys.version_info.minor))
+pythonFull = float(str(sys.version_info.major) +
+                   "." + str(sys.version_info.minor))
 
 mvi = '/usr/share/'
 cur_skin = config.skin.primary_skin.value.replace('/skin.xml', '')
@@ -69,13 +70,13 @@ def check_module_skin():
             user_skin = user_skin + readXMLfile(skin_base_fold + f)
 
     if os.path.exists(skin_base_fold + folderskinfiles):
-            user_skin3 = skin_base_fold + folderskinfiles
-            user_skin3 = user_skin3 + '/'
-            for f in listdir(user_skin3):
-                if f.endswith('.xml'):
-                    print('ffff ', f)
-                    checklogskin("update write myFile %s" % f)
-                    user_skin2 = user_skin0 + readXMLfile(user_skin3 + f)
+        user_skin3 = skin_base_fold + folderskinfiles
+        user_skin3 = user_skin3 + '/'
+        for f in listdir(user_skin3):
+            if f.endswith('.xml'):
+                print('ffff ', f)
+                checklogskin("update write myFile %s" % f)
+                user_skin2 = user_skin0 + readXMLfile(user_skin3 + f)
 
     if user_skin != '':
         user_skin = "<skin>\n" + user_skin + '\n\n\n\n\n' + user_skin2
@@ -85,8 +86,18 @@ def check_module_skin():
             myFile.write(user_skin)
             myFile.flush()
             myFile.close()
-    checkComponent(user_skin, 'render', resolveFilename(SCOPE_PLUGINS, '../Components/Renderer/'))
-    checkComponent(user_skin, 'Convert', resolveFilename(SCOPE_PLUGINS, '../Components/Converter/'))
+    checkComponent(
+        user_skin,
+        'render',
+        resolveFilename(
+            SCOPE_PLUGINS,
+            '../Components/Renderer/'))
+    checkComponent(
+        user_skin,
+        'Convert',
+        resolveFilename(
+            SCOPE_PLUGINS,
+            '../Components/Converter/'))
     checkComponent(user_skin, 'pixmap', resolveFilename(SCOPE_GUISKIN, ''))
     checkComponent(user_skin, 'image', resolveFilename(SCOPE_GUISKIN, ''))
     return
@@ -100,9 +111,9 @@ def checkComponent(myContent, look4Component, myPath):
         # global varShowFile
         checklogskin("Missing component found:%s" % name)
         # if varShowFile == '':
-            # varShowFile = name
+        # varShowFile = name
         # else:
-            # varShowFile += sep + name
+        # varShowFile += sep + name
     r = re.findall(r' %s="([a-zA-Z0-9_/\.]+)"' % look4Component, myContent)
     r = list(set(r))
     checklogskin("I found %s:" % r)
@@ -113,27 +124,53 @@ def checkComponent(myContent, look4Component, myPath):
                 # varShowFile = ''
                 if 'Renderer' in myPath:
                     if PY3:
-                        if not fileExists(myPath + str(ComponentFind) + ".pyc") and fileExists(myPath + str(ComponentFind) + ".py"):
+                        if not fileExists(
+                                myPath +
+                                str(ComponentFind) +
+                                ".pyc") and fileExists(
+                                myPath +
+                                str(ComponentFind) +
+                                ".py"):
                             upShowFile(myPath + str(ComponentFind) + ".pyc")
                     else:
-                        if not fileExists(myPath + str(ComponentFind) + ".pyo") and fileExists(myPath + str(ComponentFind) + ".py"):
+                        if not fileExists(
+                                myPath +
+                                str(ComponentFind) +
+                                ".pyo") and fileExists(
+                                myPath +
+                                str(ComponentFind) +
+                                ".py"):
                             upShowFile(myPath + str(ComponentFind) + ".pyo")
                     # if not fileExists(myPath + str(ComponentFind) + ".py"):
                         # upShowFile(myPath + str(ComponentFind) + ".py")
                 elif 'Converter' in myPath:
                     if PY3:
-                        if not fileExists(myPath + str(ComponentFind) + ".pyc") and fileExists(myPath + str(ComponentFind) + ".py"):
+                        if not fileExists(
+                                myPath +
+                                str(ComponentFind) +
+                                ".pyc") and fileExists(
+                                myPath +
+                                str(ComponentFind) +
+                                ".py"):
                             upShowFile(myPath + str(ComponentFind) + ".pyc")
                     else:
                         if not PY3:
-                            if not fileExists(myPath + str(ComponentFind) + ".pyo") and fileExists(myPath + str(ComponentFind) + ".py"):
-                                upShowFile(myPath + str(ComponentFind) + ".pyo")
+                            if not fileExists(
+                                    myPath +
+                                    str(ComponentFind) +
+                                    ".pyo") and fileExists(
+                                    myPath +
+                                    str(ComponentFind) +
+                                    ".py"):
+                                upShowFile(
+                                    myPath + str(ComponentFind) + ".pyo")
                         # if not fileExists(myPath + str(ComponentFind) + ".py"):
                             # upShowFile(myPath + str(ComponentFind) + ".py")
                 else:
                     for i in listdir(mvi + "enigma2/" + cur_skin + '/'):
                         if ComponentFind.startswith(str(i)):
-                            ComponentFind = mvi + "enigma2/" + cur_skin + '/' + str(ComponentFind)
+                            ComponentFind = mvi + "enigma2/" + \
+                                cur_skin + '/' + str(ComponentFind)
                     if look4Component == 'pixmap':
                         if ComponentFind.startswith('/'):
                             if not os.path.exists(ComponentFind):
