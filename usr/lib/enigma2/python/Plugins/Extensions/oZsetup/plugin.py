@@ -101,9 +101,8 @@ except Exception as e:
 
 Uri.imagevers()
 #  config section - ===========
-version = '3.0'
-descplug = 'Customization tool for oZeta Skin v.%s' % version
-plugindesc = 'Manage your oZeta Skin v.%s' % version
+descplug = 'Customization tool for oZeta Skin v.%s' % __version__
+plugindesc = 'Manage your oZeta Skin v.%s' % __version__
 iconpic = 'plugin.png'
 sample = mvi + 'enigma2/' + cur_skin + '/zSetup/zSample'
 config.ozeta = ConfigSubsection()
@@ -2038,7 +2037,7 @@ class ozHelp(Screen):
         Screen.__init__(self, session)
         self.session = session
         self.setup_title = ('About oZsetup')
-        self["version"] = Label(version)
+        self["version"] = Label(__version__)
         self['key_red'] = Label(_('Back'))
         self['key_green'] = Label(_('ApiKey Info'))
         self['key_yellow'] = Label(_('Preview Info'))
@@ -2059,7 +2058,7 @@ class ozHelp(Screen):
 
     def homecontext(self):
         conthelp = "Original oZeta Skin"
-        conthelp += "Version : " + "%s\n" % version
+        conthelp += "Version : " + "%s\n" % __version__
         conthelp += "License: Open\n\n"
         conthelp += "Skin Author: Mmark - Info: e2skin.blogspot.it\n"
         conthelp += "Tested on:\n"
