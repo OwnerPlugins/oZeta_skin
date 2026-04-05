@@ -46,6 +46,8 @@ if sys.version_info[0] >= 3:
     from urllib.parse import quote as urllib_quote
 else:
     from urllib2 import quote as urllib_quote
+import gettext
+_ = gettext.gettext
 
 
 class WeatherIconItem:

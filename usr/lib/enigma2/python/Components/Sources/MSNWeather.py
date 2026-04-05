@@ -26,6 +26,8 @@ from Components.WeatherMSN import weathermsn
 
 import six
 SIGN = '°' if six.PY3 else str('\xc2\xb0')
+import gettext
+_ = gettext.gettext
 
 
 class MSNWeather(Source):

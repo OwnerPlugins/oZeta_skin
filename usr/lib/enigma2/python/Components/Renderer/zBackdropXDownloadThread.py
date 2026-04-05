@@ -114,22 +114,6 @@ elif screenwidth.width() <= 1920:
 else:
     isz = isz.replace(isz, "1280,1920")
 
-'''
-isz = "w780"
-"backdrop_sizes": [
-      "w45",
-      "w92",
-      "w154",
-      "w185",
-      "w300",
-      "w500",
-      "w780",
-      "w1280",
-      "w1920",
-      "original"
-    ]
-'''
-
 
 def intCheck():
     try:
