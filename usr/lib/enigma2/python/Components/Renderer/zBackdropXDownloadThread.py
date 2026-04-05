@@ -173,8 +173,7 @@ class zBackdropXDownloadThread(threading.Thread):
             self.title_safe = title_safe.replace('+', ' ')
             # Sanitize the filename before saving
             # self.title_safe = sanitize_filename(self.title_safe)
-            url = f"https://api.themoviedb.org/3/search/multi?api_key={tmdb_api}&language={lng}&query={
-                self.title_safe}"
+            url = "https://api.themoviedb.org/3/search/multi?api_key=" + tmdb_api + "&language=" + lng + "&query=" + self.title_safe
             print('backdrop search_tmdb url title safe', url)
             data = None
             retries = Retry(total=1, backoff_factor=1)

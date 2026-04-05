@@ -21,8 +21,6 @@
 #
 # mod from lululla 20240628
 # for localized messages
-import gettext
-from . import _
 from xml.etree.cElementTree import fromstring as cet_fromstring
 from twisted.internet import defer
 from twisted.web.client import getPage, downloadPage
@@ -47,7 +45,6 @@ if sys.version_info[0] >= 3:
     from urllib.parse import quote as urllib_quote
 else:
     from urllib2 import quote as urllib_quote
-_ = gettext.gettext
 
 
 class WeatherIconItem:
@@ -337,8 +334,7 @@ class MSNWeather:
                     item).addCallback(
                     self.finishedIconDownload,
                     item) for item in IconDownloadList]
-            finished = defer.DeferredList(downloads).addErrback(
-                self.error).addCallback(self.finishedAllDownloadFiles)
+            defer.DeferredList(downloads).addErrback(self.error).addCallback(self.finishedAllDownloadFiles)
         else:
             self.finishedAllDownloadFiles(None)
 
@@ -347,4 +343,4 @@ class MSNWeather:
 
 
 def download(item):
-    return downloadPage(item.url, file(item.filename, 'wb'))
+    return downloadPage(item.url, open(item.filename, 'wb'))
