@@ -1,53 +1,38 @@
 import re
+import sys
+import six
+import types
 from six import unichr, iteritems
 from six.moves import html_entities
-import sys
-import types
-PY2 = sys.version_info[0] == 2
-PY3 = sys.version_info[0] == 3
 
-if PY3:
-    string_types = (str,)
-    integer_types = (int,)
-    class_types = (type,)
-    text_type = str
-    binary_type = bytes
+# Python 2/3 compatibility definitions with safe fallbacks
+try:
+    # Try to use native Python 2 types
+    basestring = basestring
+    long = long
+    unicode = unicode
+except NameError:
+    # Python 3 - define aliases for compatibility
+    basestring = str
+    long = int
+    unicode = str
 
-    MAXSIZE = sys.maxsize
-else:
-    string_types = (basestring,)
-    integer_types = (int, long)
-    class_types = (type, types.ClassType)
-    text_type = unicode
-    binary_type = str
+# Type definitions for cross-version compatibility
+string_types = (basestring,)
+integer_types = (int, long)
+text_type = unicode
+binary_type = bytes if sys.version_info[0] >= 3 else str
 
-    if sys.platform.startswith("java"):
-        # Jython always uses 32 bits.
-        MAXSIZE = int((1 << 31) - 1)
-    else:
-        # It's possible to have sizeof(long) != sizeof(Py_ssize_t).
-        class X(object):
-
-            def __len__(self):
-                return 1 << 31
-        try:
-            len(X())
-        except OverflowError:
-            # 32-bit
-            MAXSIZE = int((1 << 31) - 1)
-        else:
-            # 64-bit
-            MAXSIZE = int((1 << 63) - 1)
-        del X
+# Class types compatibility
+class_types = (type,) if six.PY3 else (type, types.ClassType)
+MAXSIZE = sys.maxsize  # Compatible with both versions
 
 _UNICODE_MAP = {
     k: unichr(v) for k,
     v in iteritems(
         html_entities.name2codepoint)}
 _ESCAPE_RE = re.compile("[&<>\"']")
-# Whitespace handling added due to "hand-assed" parsers of html pages
 _UNESCAPE_RE = re.compile(r"&\s*(#?)(\w+?)\s*;")
-# Dictionary for escaping special HTML characters
 _ESCAPE_DICT = {
     "&": "&amp;",
     "<": "&lt;",
@@ -57,26 +42,27 @@ _ESCAPE_DICT = {
 }
 
 
-def ensure_str(s, encoding='utf-8', errors='strict'):
+def ensure_str(s, encoding="utf-8", errors="strict"):
     """Coerce *s* to `str`.
 
-    For Python 2:
+    - In Python 2:
       - `unicode` -> encoded to `str`
       - `str` -> `str`
-
-    For Python 3:
+    - In Python 3:
       - `str` -> `str`
       - `bytes` -> decoded to `str`
     """
-    # Optimization: Fast return for the common case.
-    if type(s) is str:
-        return s
-    if PY2 and isinstance(s, text_type):
-        return s.encode(encoding, errors)
-    elif PY3 and isinstance(s, binary_type):
-        return s.decode(encoding, errors)
-    elif not isinstance(s, (text_type, binary_type)):
+    if not isinstance(s, string_types + (binary_type,)):
         raise TypeError("not expecting type '%s'" % type(s))
+
+    if isinstance(s, text_type):
+        return s.encode(encoding, errors)
+    elif isinstance(s, binary_type):
+        # For Python 3 bytes, or Python 2 str
+        if sys.version_info[0] >= 3:
+            return s.decode(encoding, errors)
+        else:
+            return s
     return s
 
 
@@ -86,7 +72,7 @@ def html_escape(value):
 
 
 def html_unescape(value):
-    return _UNESCAPE_RE.sub(_convert_entity, ensure_str(value).strip())
+    return _UNESCAPE_RE.sub(_convert_entity, text_type(value).strip())
 
 
 def _convert_entity(m):
