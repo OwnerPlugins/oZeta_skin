@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
+import skin
 from os import system
 # Components
 from Components.config import config
@@ -22,7 +23,6 @@ from sys import _getframe as getframe
 DEFAULT_MODULE_NAME = __name__.split(".")[-1]
 
 # Various
-import skin
 # by lululla
 
 
@@ -35,14 +35,20 @@ def getTextBoundarySize(instance, font, targetSize, text):
     return eLabel.calculateTextSize(font, text, targetSize)
 
 
-def fileReadLines(filename, default=None, source=DEFAULT_MODULE_NAME, debug=False):
+def fileReadLines(
+        filename,
+        default=None,
+        source=DEFAULT_MODULE_NAME,
+        debug=False):
     lines = None
     try:
         with open(filename, "r") as fd:
             lines = fd.read().splitlines()
     except OSError as err:
         if err.errno != ENOENT:  # ENOENT - No such file or directory.
-            print("[%s] Error %d: Unable to read lines from file '%s'!  (%s)" % (source, err.errno, filename, err.strerror))
+            print(
+                "[%s] Error %d: Unable to read lines from file '%s'!  (%s)" %
+                (source, err.errno, filename, err.strerror))
         lines = default
     return lines
 
@@ -122,12 +128,16 @@ class File_Commander(Screen):
         if self.selLine is not None and 0 <= self.selLine < len(self.list):
             current_line = self.list[self.selLine][0]
             from Screens.VirtualKeyBoard import VirtualKeyBoard
-            self.session.openWithCallback(self.VirtualKeyBoardCallback, VirtualKeyBoard, title="Edit Line", text=current_line)
+            self.session.openWithCallback(
+                self.VirtualKeyBoardCallback,
+                VirtualKeyBoard,
+                title="Edit Line",
+                text=current_line)
 
     def VirtualKeyBoardCallback(self, callback=None):
         if callback is not None and len(callback):
             new_line = callback
-            self.list[self.selLine] = (new_line,)  
+            self.list[self.selLine] = (new_line,)
             self.isChanged = True
             self.refreshList()  # Rendi visibile la lista aggiornata
 
@@ -149,7 +159,12 @@ class File_Commander(Screen):
         for x in self.list:
             my_x = x.partition(": ")[2]
             self.list.remove(x)
-            self.list.insert(lineno - 1, str(lineno).zfill(4) + ": " + my_x)  # '\n')
+            self.list.insert(
+                lineno -
+                1,
+                str(lineno).zfill(4) +
+                ": " +
+                my_x)  # '\n')
             lineno += 1
         self["filedata"].setList(self.list)
 
