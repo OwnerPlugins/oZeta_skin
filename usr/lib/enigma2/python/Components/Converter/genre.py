@@ -7,6 +7,9 @@ from Components.config import config
 #  some broadcaster do define other types so this list
 #  may grow or be replaced..
 
+import gettext
+_ = gettext.gettext
+
 
 class GenresETSI:
     maintype = (
