@@ -21,6 +21,7 @@
 #
 # mod from lululla 20240628
 # for localized messages
+import gettext
 from . import _
 from xml.etree.cElementTree import fromstring as cet_fromstring
 from twisted.internet import defer
@@ -46,7 +47,6 @@ if sys.version_info[0] >= 3:
     from urllib.parse import quote as urllib_quote
 else:
     from urllib2 import quote as urllib_quote
-import gettext
 _ = gettext.gettext
 
 
