@@ -334,7 +334,9 @@ class MSNWeather:
                     item).addCallback(
                     self.finishedIconDownload,
                     item) for item in IconDownloadList]
-            defer.DeferredList(downloads).addErrback(self.error).addCallback(self.finishedAllDownloadFiles)
+            defer.DeferredList(downloads).addErrback(
+                self.error).addCallback(
+                self.finishedAllDownloadFiles)
         else:
             self.finishedAllDownloadFiles(None)
 
