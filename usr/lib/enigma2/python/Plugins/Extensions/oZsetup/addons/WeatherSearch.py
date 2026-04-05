@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import print_function
+import gettext
 # from . import _
 from enigma import eListboxPythonMultiContent
 from enigma import getDesktop, gFont
@@ -22,7 +23,6 @@ import six
 from skin import parameters as skinparameter
 from Screens.VirtualKeyBoard import VirtualKeyBoard
 HD = getDesktop(0).size()
-import gettext
 _ = gettext.gettext
 
 
