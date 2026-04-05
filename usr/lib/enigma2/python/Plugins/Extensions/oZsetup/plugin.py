@@ -7,7 +7,7 @@
 #  Lululla coder and MMark skinner 2022.07.20
 #  NOT REMOVE DISCLAIMER!!!
 from __future__ import absolute_import
-from . import _
+from . import _, __version__
 from .addons import Uri
 from .addons.Utils import RequestAgent
 from Components.AVSwitch import AVSwitch

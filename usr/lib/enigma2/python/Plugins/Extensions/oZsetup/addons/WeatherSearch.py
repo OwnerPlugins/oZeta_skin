@@ -22,6 +22,8 @@ import six
 from skin import parameters as skinparameter
 from Screens.VirtualKeyBoard import VirtualKeyBoard
 HD = getDesktop(0).size()
+import gettext
+_ = gettext.gettext
 
 
 def initWeatherPluginEntryConfig():
