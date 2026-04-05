@@ -19,6 +19,7 @@ import six
 from six import unichr, iteritems
 from six.moves import html_entities
 import types
+import unicodedata
 
 requests.packages.urllib3.disable_warnings(
     requests.packages.urllib3.exceptions.InsecureRequestWarning)
@@ -227,22 +228,54 @@ class AspectManager:
     """Manages aspect ratio settings for the plugin"""
 
     def __init__(self):
-        self.init_aspect = self.get_current_aspect()
-        print("[INFO] Initial aspect ratio:", self.init_aspect)
+        try:
+            self.init_aspect = self.get_current_aspect()
+            print("[INFO] Initial aspect ratio:", self.init_aspect)
+        except Exception as e:
+            print("[ERROR] Failed to initialize aspect manager:", str(e))
+            self.init_aspect = 0  # Fallback
 
     def get_current_aspect(self):
         """Get current aspect ratio setting"""
         try:
-            return int(AVSwitch().getAspectRatioSetting())
-        except Exception as e:
+            aspect = AVSwitch().getAspectRatioSetting()
+            # Assicurati che sia un intero valido
+            return int(aspect) if aspect is not None else 0
+        except (ValueError, TypeError, Exception) as e:
             print("[ERROR] Failed to get aspect ratio:", str(e))
-            return 0
+            return 0  # Default 4:3
+
+    def set_aspect(self, aspect_ratio):
+        """Set aspect ratio based on string (e.g., '16:9', '4:3')"""
+        try:
+            aspect_map = {
+                "4:3": 0,
+                "16:9": 1,
+                "16:10": 2,
+                "auto": 3
+            }
+            
+            if aspect_ratio in aspect_map:
+                new_aspect = aspect_map[aspect_ratio]
+                print("[INFO] Setting aspect ratio to:", aspect_ratio, "(", new_aspect, ")")
+                AVSwitch().setAspectRatio(new_aspect)
+                return True
+            else:
+                print("[ERROR] Unknown aspect ratio:", aspect_ratio)
+                return False
+                
+        except Exception as e:
+            print("[ERROR] Failed to set aspect ratio:", str(e))
+            return False
 
     def restore_aspect(self):
         """Restore original aspect ratio"""
         try:
-            print("[INFO] Restoring aspect ratio to:", self.init_aspect)
-            AVSwitch().setAspectRatio(self.init_aspect)
+            if hasattr(self, 'init_aspect') and self.init_aspect is not None:
+                print("[INFO] Restoring aspect ratio to:", self.init_aspect)
+                AVSwitch().setAspectRatio(self.init_aspect)
+            else:
+                print("[WARNING] No initial aspect ratio to restore")
         except Exception as e:
             print("[ERROR] Failed to restore aspect ratio:", str(e))
 
@@ -256,24 +289,29 @@ def getDesktopSize():
     return (s.width(), s.height())
 
 
-# Chaneg code for support of wqhd detection
+def isWQHD():
+    """2560 x 1440 (WQHD)"""
+    width, height = getDesktopSize()
+    return width == 2560 and height == 1440
+
+
 def isUHD():
-    UHD = False
-    if screenwidth.width() == 2560:
-        UHD = True
-        return UHD
+    """3840 x 2160 (4K UHD)"""
+    width, height = getDesktopSize()
+    return width == 3840 and height == 2160
 
 
 def isFHD():
-    if screenwidth.width() == 1920:
-        FHD = True
-        return FHD
+    """1920 x 1080 (Full HD)"""
+    width, height = getDesktopSize()
+    return width == 1920 and height == 1080
 
 
 def isHD():
-    if screenwidth.width() == 1280:
-        HD = True
-        return HD
+    """1280 x 720 (HD)"""
+    width, height = getDesktopSize()
+    return width == 1280 and height == 720
+
 # End of code change
 
 
@@ -582,8 +620,7 @@ def defaultMoviePath():
     result = config.usage.default_path.value
     if not isdir(result):
         from Tools import Directories
-        return Directories.defaultRecordingLocation(
-            config.usage.default_path.value)
+        return Directories.defaultRecordingLocation(config.usage.default_path.value)
     return result
 
 
@@ -596,8 +633,7 @@ if not isdir(config.movielist.last_videodir.value):
 downloadm3u = config.movielist.last_videodir.value
 
 
-# this def returns the current playing service name and stream_url from
-# give sref
+# this def returns the current playing service name and stream_url from give sref
 def getserviceinfo(service_ref):
     """Get service name and URL from service reference"""
     try:
@@ -627,8 +663,8 @@ CountConnOk = 0
 def zCheckInternet(opt=1, server=None, port=None):
     global CountConnOk
     sock = False
-    checklist = [("8.8.44.4", 53), ("8.8.88.8", 53), ("www.lululla.altervista.org/",
-                                                      80), ("www.linuxsat-support.com", 443), ("www.google.com", 443)]
+    checklist = [("8.8.4.4", 53), ("8.8.8.8", 53), ("www.lululla.altervista.org/",
+                                                    80), ("www.linuxsat-support.com", 443), ("www.google.com", 443)]
     if opt < 5:
         srv = checklist[opt]
     else:
@@ -956,29 +992,28 @@ def ConverDateBack(data):
 
 
 def isPythonFolder():
-    path = ('/usr/lib/')
+    path = "/usr/lib/"
     for name in listdir(path):
-        fullname = path + name
-        if not isfile(fullname) and 'python' in fullname:
+        fullname = join(path, name)
+        if not isfile(fullname) and "python" in name:
             print(fullname)
-            import sys
             print("sys.version_info =", sys.version_info)
-            pythonvr = fullname
-            print('pythonvr is ', pythonvr)
-            x = ('%s/site-packages/streamlink' % pythonvr)
+            x = join(fullname, "site-packages", "streamlink")
             print(x)
-            # /usr/lib/python3.9/site-packages/streamlink
-    return x
+            if exists(x):
+                return x
+    return False
 
 
-def isStreamlinkAvailable():
-    pythonvr = isPythonFolder()
-    return pythonvr
+def is_streamlink_available():
+    streamlink_folder = isPythonFolder()
+    return streamlink_folder
 
 
-def isExtEplayer3Available():
+def is_exteplayer3_Available():
     from enigma import eEnv
-    return isfile(eEnv.resolve('$bindir/exteplayer3'))
+    path = eEnv.resolve("$bindir/exteplayer3")
+    return isfile(path)
 
 
 '''
@@ -1025,7 +1060,6 @@ std_headers = {
     'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
     'Accept-Language': 'en-us,en;q=0.5',
 }
-
 
 ListAgent = [
     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.77 Safari/537.36',
@@ -1231,6 +1265,29 @@ def ReadUrl(url):
         print('ReadUrl5 - Error: ', e)
         link = None
     return link
+
+
+def getUrlSiVer(url, verify=True):
+    """Fetch URL content with optional SSL verification"""
+    try:
+        headers = {'User-Agent': RequestAgent()}
+        response = requests.get(url, headers=headers, timeout=10, verify=verify)
+        response.raise_for_status()
+        return response.text
+    except Exception as e:
+        print("Error fetching URL " + str(url) + ": " + str(e))
+        return None
+
+
+def getUrlNoVer(url, verify=True):
+    try:
+        headers = {'User-Agent': RequestAgent()}
+        response = requests.get(url, headers=headers, timeout=10, verify=verify)
+        response.raise_for_status()
+        return response.text
+    except Exception as e:
+        print("Error fetching URL {}: {}".format(url, str(e)))
+        return None
 
 
 def getUrl(url):
@@ -1593,12 +1650,29 @@ def cachedel(folder):
 
 def cleanName(name):
     non_allowed_characters = "/.\\:*?<>|\""
-    name = name.replace('\xc2\x86', '').replace('\xc2\x87', '')
-    name = name.replace(' ', '-').replace("'", '').replace('&', 'e')
-    name = name.replace('(', '').replace(')', '')
-    name = name.strip()
-    name = ''.join(
-        ['_' if c in non_allowed_characters or ord(c) < 32 else c for c in name])
+    try:
+        if not isinstance(name, (str, bytes)):
+            name = str(name)
+
+        if sys.version_info[0] < 3:
+            if not isinstance(name, unicode):
+                name = unicode(name, "utf-8")
+        else:
+            if isinstance(name, bytes):
+                name = name.decode("utf-8", "ignore")
+
+        name = unicodedata.normalize(
+            "NFKD", name).encode(
+            "ASCII", "ignore").decode("ASCII")
+        name = name.replace('\xc2\x86', '').replace('\xc2\x87', '')
+        name = name.replace(' ', '-').replace("'", '').replace('&', 'e')
+        name = name.replace('(', '').replace(')', '')
+        name = name.strip()
+        name = ''.join(
+            ['_' if c in non_allowed_characters or ord(c) < 32 else c for c in name])
+    except Exception as e:
+        print("Error in cleanName: " + str(e))
+        name = "noname"
     return name
 
 
@@ -1647,346 +1721,28 @@ def remove_line(filename, pattern):
 def badcar(name):
     name = name
     bad_chars = [
-        "sd",
-        "hd",
-        "fhd",
-        "uhd",
-        "4k",
-        "1080p",
-        "720p",
-        "blueray",
-        "x264",
-        "aac",
-        "ozlem",
-        "hindi",
-        "hdrip",
-        "(cache)",
-        "(kids)",
-        "[3d-en]",
-        "[iran-dubbed]",
-        "imdb",
-        "top250",
-        "multi-audio",
-        "multi-subs",
-        "multi-sub",
-        "[audio-pt]",
-        "[nordic-subbed]",
-        "[nordic-subbeb]",
-        "SD",
-        "HD",
-        "FHD",
-        "UHD",
-        "4K",
-        "1080P",
-        "720P",
-        "BLUERAY",
-        "X264",
-        "AAC",
-        "OZLEM",
-        "HINDI",
-        "HDRIP",
-        "(CACHE)",
-        "(KIDS)",
-        "[3D-EN]",
-        "[IRAN-DUBBED]",
-        "IMDB",
-        "TOP250",
-        "MULTI-AUDIO",
-        "MULTI-SUBS",
-        "MULTI-SUB",
-        "[AUDIO-PT]",
-        "[NORDIC-SUBBED]",
-        "[NORDIC-SUBBEB]",
-        "-ae-",
-        "-al-",
-        "-ar-",
-        "-at-",
-        "-ba-",
-        "-be-",
-        "-bg-",
-        "-br-",
-        "-cg-",
-        "-ch-",
-        "-cz-",
-        "-da-",
-        "-de-",
-        "-dk-",
-        "-ee-",
-        "-en-",
-        "-es-",
-        "-ex-yu-",
-        "-fi-",
-        "-fr-",
-        "-gr-",
-        "-hr-",
-        "-hu-",
-        "-in-",
-        "-ir-",
-        "-it-",
-        "-lt-",
-        "-mk-",
-        "-mx-",
-        "-nl-",
-        "-no-",
-        "-pl-",
-        "-pt-",
-        "-ro-",
-        "-rs-",
-        "-ru-",
-        "-se-",
-        "-si-",
-        "-sk-",
-        "-tr-",
-        "-uk-",
-        "-us-",
-        "-yu-",
-        "-AE-",
-        "-AL-",
-        "-AR-",
-        "-AT-",
-        "-BA-",
-        "-BE-",
-        "-BG-",
-        "-BR-",
-        "-CG-",
-        "-CH-",
-        "-CZ-",
-        "-DA-",
-        "-DE-",
-        "-DK-",
-        "-EE-",
-        "-EN-",
-        "-ES-",
-        "-EX-YU-",
-        "-FI-",
-        "-FR-",
-        "-GR-",
-        "-HR-",
-        "-HU-",
-        "-IN-",
-        "-IR-",
-        "-IT-",
-        "-LT-",
-        "-MK-",
-        "-MX-",
-        "-NL-",
-        "-NO-",
-        "-PL-",
-        "-PT-",
-        "-RO-",
-        "-RS-",
-        "-RU-",
-        "-SE-",
-        "-SI-",
-        "-SK-",
-        "-TR-",
-        "-UK-",
-        "-US-",
-        "-YU-",
-        "|ae|",
-        "|al|",
-        "|ar|",
-        "|at|",
-        "|ba|",
-        "|be|",
-        "|bg|",
-        "|br|",
-        "|cg|",
-        "|ch|",
-        "|cz|",
-        "|da|",
-        "|de|",
-        "|dk|",
-        "|ee|",
-        "|en|",
-        "|es|",
-        "|ex-yu|",
-        "|fi|",
-        "|fr|",
-        "|gr|",
-        "|hr|",
-        "|hu|",
-        "|in|",
-        "|ir|",
-        "|it|",
-        "|lt|",
-        "|mk|",
-        "|mx|",
-        "|nl|",
-        "|no|",
-        "|pl|",
-        "|pt|",
-        "|ro|",
-        "|rs|",
-        "|ru|",
-        "|se|",
-        "|si|",
-        "|sk|",
-        "|tr|",
-        "|uk|",
-        "|us|",
-        "|yu|",
-        "|AE|",
-        "|AL|",
-        "|AR|",
-        "|AT|",
-        "|BA|",
-        "|BE|",
-        "|BG|",
-        "|BR|",
-        "|CG|",
-        "|CH|",
-        "|CZ|",
-        "|DA|",
-        "|DE|",
-        "|DK|",
-        "|EE|",
-        "|EN|",
-        "|ES|",
-        "|EX-YU|",
-        "|FI|",
-        "|FR|",
-        "|GR|",
-        "|HR|",
-        "|HU|",
-        "|IN|",
-        "|IR|",
-        "|IT|",
-        "|LT|",
-        "|MK|",
-        "|MX|",
-        "|NL|",
-        "|NO|",
-        "|PL|",
-        "|PT|",
-        "|RO|",
-        "|RS|",
-        "|RU|",
-        "|SE|",
-        "|SI|",
-        "|SK|",
-        "|TR|",
-        "|UK|",
-        "|US|",
-        "|YU|",
-        "|Ae|",
-        "|Al|",
-        "|Ar|",
-        "|At|",
-        "|Ba|",
-        "|Be|",
-        "|Bg|",
-        "|Br|",
-        "|Cg|",
-        "|Ch|",
-        "|Cz|",
-        "|Da|",
-        "|De|",
-        "|Dk|",
-        "|Ee|",
-        "|En|",
-        "|Es|",
-        "|Ex-Yu|",
-        "|Fi|",
-        "|Fr|",
-        "|Gr|",
-        "|Hr|",
-        "|Hu|",
-        "|In|",
-        "|Ir|",
-        "|It|",
-        "|Lt|",
-        "|Mk|",
-        "|Mx|",
-        "|Nl|",
-        "|No|",
-        "|Pl|",
-        "|Pt|",
-        "|Ro|",
-        "|Rs|",
-        "|Ru|",
-        "|Se|",
-        "|Si|",
-        "|Sk|",
-        "|Tr|",
-        "|Uk|",
-        "|Us|",
-        "|Yu|",
-        "(",
-        ")",
-        "[",
-        "]",
-        "u-",
-        "3d",
-        "'",
-        "#",
-        "/",
-        "-",
-        "_",
-        ".",
-        "+",
-        "PF1",
-        "PF2",
-        "PF3",
-        "PF4",
-        "PF5",
-        "PF6",
-        "PF7",
-        "PF8",
-        "PF9",
-        "PF10",
-        "PF11",
-        "PF12",
-        "PF13",
-        "PF14",
-        "PF15",
-        "PF16",
-        "PF17",
-        "PF18",
-        "PF19",
-        "PF20",
-        "PF21",
-        "PF22",
-        "PF23",
-        "PF24",
-        "PF25",
-        "PF26",
-        "PF27",
-        "PF28",
-        "PF29",
-        "PF30",
-        "480p",
-        "ANIMAZIONE",
-        "AVVENTURA",
-        "BIOGRAFICO",
-        "BDRip",
-        "BluRay",
-        "CINEMA",
-        "COMMEDIA",
-        "DOCUMENTARIO",
-        "DRAMMATICO",
-        "FANTASCIENZA",
-        "FANTASY",
-        "HDCAM",
-        "HDTC",
-        "HDTS",
-        "LD",
-        "MARVEL",
-        "MD",
-        "NEW_AUDIO",
-        "R3",
-        "R6",
-        "SENTIMENTALE",
-        "TC",
-        "TELECINE",
-        "TELESYNC",
-        "THRILLER",
-        "Uncensored",
-        "V2",
-        "WEBDL",
-        "WEBRip",
-        "WEB",
-        "WESTERN"]
+        "sd", "hd", "fhd", "uhd", "4k", "1080p", "720p", "blueray", "x264", "aac", "ozlem", "hindi", "hdrip", "(cache)", "(kids)", "[3d-en]", "[iran-dubbed]", "imdb", "top250", "multi-audio",
+        "multi-subs", "multi-sub", "[audio-pt]", "[nordic-subbed]", "[nordic-subbeb]",
+        "SD", "HD", "FHD", "UHD", "4K", "1080P", "720P", "BLUERAY", "X264", "AAC", "OZLEM", "HINDI", "HDRIP", "(CACHE)", "(KIDS)", "[3D-EN]", "[IRAN-DUBBED]", "IMDB", "TOP250", "MULTI-AUDIO",
+        "MULTI-SUBS", "MULTI-SUB", "[AUDIO-PT]", "[NORDIC-SUBBED]", "[NORDIC-SUBBEB]",
+        "-ae-", "-al-", "-ar-", "-at-", "-ba-", "-be-", "-bg-", "-br-", "-cg-", "-ch-", "-cz-", "-da-", "-de-", "-dk-", "-ee-", "-en-", "-es-", "-ex-yu-", "-fi-", "-fr-", "-gr-", "-hr-", "-hu-",
+        "-in-", "-ir-", "-it-", "-lt-", "-mk-", "-mx-", "-nl-", "-no-", "-pl-", "-pt-", "-ro-", "-rs-", "-ru-", "-se-", "-si-", "-sk-", "-tr-", "-uk-", "-us-", "-yu-",
+        "-AE-", "-AL-", "-AR-", "-AT-", "-BA-", "-BE-", "-BG-", "-BR-", "-CG-", "-CH-", "-CZ-", "-DA-", "-DE-", "-DK-", "-EE-", "-EN-", "-ES-", "-EX-YU-", "-FI-", "-FR-", "-GR-", "-HR-", "-HU-",
+        "-IN-", "-IR-", "-IT-", "-LT-", "-MK-", "-MX-", "-NL-", "-NO-", "-PL-", "-PT-", "-RO-", "-RS-", "-RU-", "-SE-", "-SI-", "-SK-", "-TR-", "-UK-", "-US-", "-YU-",
+        "|ae|", "|al|", "|ar|", "|at|", "|ba|", "|be|", "|bg|", "|br|", "|cg|", "|ch|", "|cz|", "|da|", "|de|", "|dk|", "|ee|", "|en|", "|es|", "|ex-yu|", "|fi|", "|fr|", "|gr|", "|hr|", "|hu|",
+        "|in|", "|ir|", "|it|", "|lt|", "|mk|", "|mx|", "|nl|", "|no|", "|pl|", "|pt|", "|ro|", "|rs|", "|ru|", "|se|", "|si|", "|sk|", "|tr|", "|uk|", "|us|", "|yu|",
+        "|AE|", "|AL|", "|AR|", "|AT|", "|BA|", "|BE|", "|BG|", "|BR|", "|CG|", "|CH|", "|CZ|", "|DA|", "|DE|", "|DK|", "|EE|", "|EN|", "|ES|", "|EX-YU|", "|FI|", "|FR|", "|GR|", "|HR|", "|HU|",
+        "|IN|", "|IR|", "|IT|", "|LT|", "|MK|", "|MX|", "|NL|", "|NO|", "|PL|", "|PT|", "|RO|", "|RS|", "|RU|", "|SE|", "|SI|", "|SK|", "|TR|", "|UK|", "|US|", "|YU|",
+        "|Ae|", "|Al|", "|Ar|", "|At|", "|Ba|", "|Be|", "|Bg|", "|Br|", "|Cg|", "|Ch|", "|Cz|", "|Da|", "|De|", "|Dk|", "|Ee|", "|En|", "|Es|", "|Ex-Yu|", "|Fi|", "|Fr|", "|Gr|", "|Hr|", "|Hu|",
+        "|In|", "|Ir|", "|It|", "|Lt|", "|Mk|", "|Mx|", "|Nl|", "|No|", "|Pl|", "|Pt|", "|Ro|", "|Rs|", "|Ru|", "|Se|", "|Si|", "|Sk|", "|Tr|", "|Uk|", "|Us|", "|Yu|",
+        "(", ")", "[", "]", "u-", "3d", "'", "#", "/", "-", "_", ".", "+",
+        "PF1", "PF2", "PF3", "PF4", "PF5", "PF6", "PF7", "PF8", "PF9", "PF10", "PF11", "PF12", "PF13", "PF14", "PF15", "PF16", "PF17", "PF18", "PF19", "PF20",
+        "PF21", "PF22", "PF23", "PF24", "PF25", "PF26", "PF27", "PF28", "PF29", "PF30",
+        "480p", "ANIMAZIONE", "AVVENTURA", "BIOGRAFICO", "BDRip", "BluRay", "CINEMA", "COMMEDIA",
+        "DOCUMENTARIO", "DRAMMATICO", "FANTASCIENZA", "FANTASY", "HDCAM", "HDTC", "HDTS", "LD",
+        "MARVEL", "MD", "NEW_AUDIO", "R3", "R6", "SENTIMENTALE", "TC", "TELECINE", "TELESYNC",
+        "THRILLER", "Uncensored", "V2", "WEBDL", "WEBRip", "WEB", "WESTERN"
+    ]
 
     for j in range(1900, 2025):
         bad_chars.append(str(j))
@@ -2001,7 +1757,7 @@ def get_title(title):
         return
     # try:
         # title = title.encode('utf-8')
-    # except:
+    # except BaseException:
         # pass
     title = re.sub(r'&#(\d+);', '', title)
     title = re.sub(r'(&#[0-9]+)([^;^0-9]+)', '\\1;\\2', title)
