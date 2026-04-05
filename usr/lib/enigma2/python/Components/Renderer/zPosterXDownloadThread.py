@@ -224,7 +224,8 @@ class zPosterXDownloadThread(threading.Thread):
                 self.downloadData2(data)
                 return True, "Download started successfully"
             else:
-                return False, "Error during TMDb search: " + str(response.status_code)
+                return False, "Error during TMDb search: " + \
+                    str(response.status_code)
         except Exception as e:
             print('Error during TMDb search:', e)
             return False, "Error during TMDb search"
