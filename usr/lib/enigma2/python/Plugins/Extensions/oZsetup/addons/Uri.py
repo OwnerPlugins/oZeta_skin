@@ -11,6 +11,8 @@ from __future__ import absolute_import
 from Tools import Notifications
 from Screens.MessageBox import MessageBox
 from Tools.Directories import fileExists
+import gettext
+_ = gettext.gettext
 print("oZeta Uri")
 global CountConnOk
 CountConnOk = 0
