@@ -5,27 +5,36 @@ import types
 from six import unichr, iteritems
 from six.moves import html_entities
 
-# Python 2/3 compatibility definitions with safe fallbacks
 try:
-    # Try to use native Python 2 types
-    basestring = basestring
-    long = long
-    unicode = unicode
+    unicode
 except NameError:
-    # Python 3 - define aliases for compatibility
-    basestring = str
-    long = int
-    unicode = str
+    unicode = str  # Python 3 fallback
 
-# Type definitions for cross-version compatibility
-string_types = (basestring,)
-integer_types = (int, long)
-text_type = unicode
-binary_type = bytes if sys.version_info[0] >= 3 else str
+try:
+    basestring
+except NameError:
+    basestring = str  # fake definition for linter
 
-# Class types compatibility
+try:
+    long
+except NameError:
+    long = int  # fake definition for linter
+
+
+if sys.version_info[0] < 3:
+    string_types = (basestring,)
+    integer_types = (int, long)
+    text_type = unicode
+else:
+    string_types = (str,)
+    integer_types = (int,)
+    text_type = str
+
+
 class_types = (type,) if six.PY3 else (type, types.ClassType)
-MAXSIZE = sys.maxsize  # Compatible with both versions
+# text_type = six.text_type  # unicode in Py2, str in Py3
+binary_type = six.binary_type  # str in Py2, bytes in Py3
+MAXSIZE = sys.maxsize  # Compatibile con entrambe le versioni
 
 _UNICODE_MAP = {
     k: unichr(v) for k,
@@ -52,18 +61,11 @@ def ensure_str(s, encoding="utf-8", errors="strict"):
       - `str` -> `str`
       - `bytes` -> decoded to `str`
     """
-    if not isinstance(s, string_types + (binary_type,)):
-        raise TypeError("not expecting type '%s'" % type(s))
-
-    if isinstance(s, text_type):
-        return s.encode(encoding, errors)
-    elif isinstance(s, binary_type):
-        # For Python 3 bytes, or Python 2 str
-        if sys.version_info[0] >= 3:
-            return s.decode(encoding, errors)
-        else:
-            return s
-    return s
+    if isinstance(s, str):
+        return s
+    if isinstance(s, binary_type):
+        return s.decode(encoding, errors)
+    raise TypeError("not expecting type '%s'" % type(s))
 
 
 def html_escape(value):
@@ -72,7 +74,7 @@ def html_escape(value):
 
 
 def html_unescape(value):
-    return _UNESCAPE_RE.sub(_convert_entity, text_type(value).strip())
+    return _UNESCAPE_RE.sub(_convert_entity, ensure_str(value).strip())
 
 
 def _convert_entity(m):
