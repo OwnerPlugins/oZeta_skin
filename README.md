@@ -1,5 +1,5 @@
 # Skin for Box Enigma2
-![](https://komarev.com/ghpvc/?username=Belfagor2005)
+![Visitors](https://komarev.com/ghpvc/?username=Belfagor2005&label=Repository%20Views&color=blueviolet)
 
 by Mmark
 
