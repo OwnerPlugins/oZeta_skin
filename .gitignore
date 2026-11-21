@@ -5,3 +5,4 @@ usr/lib/enigma2/python/Plugins/Extensions/oZsetup/plugin~.py
 usr/lib/enigma2/python/Plugins/Extensions/oZsetup/plugin-.py
 usr/share/enigma2/oZeta-FHD/zSkin/skin_xtreaamity.xml~
 usr/lib/enigma2/python/Plugins/Extensions/oZsetup/plugin.py-
+__pycache__/
